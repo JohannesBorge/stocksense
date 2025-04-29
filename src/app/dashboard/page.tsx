@@ -114,11 +114,18 @@ export default function Dashboard() {
     if (!user) return;
 
     try {
-      await deleteAnalysis(user.uid, symbol);
+      // Optimistically update the UI
       setStocks(prevStocks => prevStocks.filter(stock => stock.symbol !== symbol));
+      
+      // Then perform the actual deletion
+      await deleteAnalysis(user.uid, symbol);
     } catch (error) {
       console.error('Error deleting analysis:', error);
       setError('Failed to delete analysis. Please try again.');
+      
+      // Revert the UI state if deletion fails
+      const analyses = await getUserAnalyses(user.uid);
+      setStocks(analyses);
     }
   };
 
@@ -256,4 +263,4 @@ export default function Dashboard() {
       </div>
     </Layout>
   );
-} 
+}
