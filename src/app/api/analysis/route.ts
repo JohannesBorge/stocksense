@@ -15,7 +15,11 @@ const openai = new OpenAI({
 
 export async function POST(request: Request) {
   try {
-    const { symbol, stockData, companyOverview } = await request.json();
+    const { symbol, stockData, companyOverview }: {
+      symbol: string;
+      stockData: StockData;
+      companyOverview: CompanyOverview;
+    } = await request.json();
 
     const prompt = `Analyze the following stock data and provide insights:
 Symbol: ${symbol}
