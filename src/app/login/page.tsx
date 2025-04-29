@@ -22,7 +22,7 @@ export default function Login() {
     try {
       await signIn(email, password);
       router.push('/');
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to sign in. Please check your credentials.');
     } finally {
       setIsLoading(false);
@@ -36,7 +36,7 @@ export default function Login() {
     try {
       await signInWithGoogle();
       router.push('/');
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to sign in with Google.');
     } finally {
       setIsLoading(false);

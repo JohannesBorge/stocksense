@@ -29,7 +29,7 @@ export default function SignUp() {
     try {
       await signUp(email, password);
       router.push('/');
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to create an account.');
     } finally {
       setIsLoading(false);
@@ -43,7 +43,7 @@ export default function SignUp() {
     try {
       await signInWithGoogle();
       router.push('/');
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to sign in with Google.');
     } finally {
       setIsLoading(false);
