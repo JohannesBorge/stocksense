@@ -1,21 +1,10 @@
+'use client';
+
+import { StockAnalysis } from '@/types/stock';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
 
-interface StockCardProps {
-  symbol: string;
-  companyName: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  news: {
-    title: string;
-    source: string;
-    date: string;
-  }[];
-  sentiment: 'positive' | 'negative' | 'neutral';
-  aiInsight: string;
-  date: string;
-}
+interface StockCardProps extends StockAnalysis {}
 
 export default function StockCard({
   symbol,
@@ -28,7 +17,12 @@ export default function StockCard({
   aiInsight,
   date,
 }: StockCardProps) {
-  const isPositive = change >= 0;
+  const isPositive = parseFloat(change) >= 0;
+  const sentimentColors = {
+    positive: 'bg-green-500/10 text-green-400',
+    neutral: 'bg-yellow-500/10 text-yellow-400',
+    negative: 'bg-red-500/10 text-red-400',
+  };
 
   return (
     <div className="bg-gray-800 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-700">
@@ -50,9 +44,15 @@ export default function StockCard({
                 isPositive ? 'text-green-400' : 'text-red-400'
               }`}
             >
-              {change.toFixed(2)} ({changePercent.toFixed(2)}%)
+              {change} ({changePercent}%)
             </span>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${sentimentColors[sentiment]}`}>
+          {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)} Sentiment
         </div>
       </div>
 
@@ -60,40 +60,20 @@ export default function StockCard({
         <h4 className="text-sm font-medium text-white">Latest News</h4>
         <ul className="mt-2 space-y-2">
           {news.map((item, index) => (
-            <li key={index} className="text-sm">
-              <p className="text-gray-200">{item.title}</p>
-              <p className="text-gray-400">
-                {item.source} • {format(new Date(item.date), 'MMM d, yyyy')}
-              </p>
+            <li key={index} className="text-sm text-gray-400">
+              {item.title}
             </li>
           ))}
         </ul>
       </div>
 
       <div className="mt-4">
-        <div className="flex items-center">
-          <span className="text-sm font-medium text-white">Sentiment:</span>
-          <span
-            className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${
-              sentiment === 'positive'
-                ? 'bg-green-900 text-green-300'
-                : sentiment === 'negative'
-                ? 'bg-red-900 text-red-300'
-                : 'bg-gray-700 text-gray-300'
-            }`}
-          >
-            {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
-          </span>
-        </div>
-      </div>
-
-      <div className="mt-4">
         <h4 className="text-sm font-medium text-white">AI Insight</h4>
-        <p className="mt-1 text-sm text-gray-300">{aiInsight}</p>
+        <p className="mt-1 text-sm text-gray-400">{aiInsight}</p>
       </div>
 
-      <div className="mt-4 text-sm text-gray-400">
-        Analysis generated on {format(new Date(date), 'MMM d, yyyy')}
+      <div className="mt-4 text-xs text-gray-500">
+        Last updated: {date}
       </div>
     </div>
   );

@@ -3,32 +3,33 @@
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { StockData, StockAnalysis } from '@/types/stock';
 
 interface AnalysisModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (analysis: any) => void;
+  onSave: (analysis: StockAnalysis) => void;
 }
 
 export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModalProps) {
   const [stockSymbol, setStockSymbol] = useState('');
-  const [stockData, setStockData] = useState<any>(null);
+  const [stockData, setStockData] = useState<StockData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Mock function to simulate live stock data updates
   const fetchStockData = async (symbol: string) => {
     try {
       // TODO: Replace with actual API call
-      const mockData = {
+      const mockData: StockData = {
         symbol,
         price: Math.random() * 1000,
         change: (Math.random() * 10 - 5).toFixed(2),
         changePercent: (Math.random() * 10 - 5).toFixed(2),
       };
       setStockData(mockData);
-    } catch (error) {
-      setError('Failed to fetch stock data');
+    } catch (err) {
+      setErrorMessage('Failed to fetch stock data');
     }
   };
 
@@ -46,12 +47,12 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
     setIsLoading(true);
     try {
       // TODO: Replace with actual OpenAI API call
-      const analysis = {
+      const analysis: StockAnalysis = {
         symbol: stockSymbol,
         companyName: 'Example Company',
-        price: stockData?.price,
-        change: stockData?.change,
-        changePercent: stockData?.changePercent,
+        price: stockData?.price || 0,
+        change: stockData?.change || '0',
+        changePercent: stockData?.changePercent || '0',
         news: [
           {
             title: 'Example news article 1',
@@ -65,8 +66,8 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
       };
       onSave(analysis);
       onClose();
-    } catch (error) {
-      setError('Failed to generate analysis');
+    } catch (err) {
+      setErrorMessage('Failed to generate analysis');
     } finally {
       setIsLoading(false);
     }
@@ -148,9 +149,9 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
                         </div>
                       )}
 
-                      {error && (
+                      {errorMessage && (
                         <div className="text-sm text-red-400">
-                          {error}
+                          {errorMessage}
                         </div>
                       )}
                     </div>

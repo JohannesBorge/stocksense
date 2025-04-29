@@ -6,14 +6,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 import StockCard from '@/components/StockCard';
 import AnalysisModal from '@/components/AnalysisModal';
+import { StockAnalysis } from '@/types/stock';
 
-const exampleStocks = [
+const exampleStocks: StockAnalysis[] = [
   {
     symbol: 'AAPL',
     companyName: 'Apple Inc.',
     price: 175.04,
-    change: 2.34,
-    changePercent: 1.35,
+    change: '2.34',
+    changePercent: '1.35',
     news: [
       {
         title: 'Apple announces new AI features for iOS 18',
@@ -26,7 +27,7 @@ const exampleStocks = [
         date: '2024-03-14',
       },
     ],
-    sentiment: 'positive' as const,
+    sentiment: 'positive',
     aiInsight: 'Apple shows strong momentum with recent product announcements and earnings. The company\'s focus on AI integration could drive future growth.',
     date: '2024-03-15',
   },
@@ -34,8 +35,8 @@ const exampleStocks = [
     symbol: 'MSFT',
     companyName: 'Microsoft Corporation',
     price: 415.32,
-    change: -1.25,
-    changePercent: -0.30,
+    change: '-1.25',
+    changePercent: '-0.30',
     news: [
       {
         title: 'Microsoft expands Azure cloud services in Europe',
@@ -48,7 +49,7 @@ const exampleStocks = [
         date: '2024-03-14',
       },
     ],
-    sentiment: 'neutral' as const,
+    sentiment: 'neutral',
     aiInsight: 'Microsoft maintains strong position in cloud and AI markets. Recent partnerships and expansions show continued growth potential.',
     date: '2024-03-15',
   },
@@ -56,8 +57,8 @@ const exampleStocks = [
     symbol: 'GOOGL',
     companyName: 'Alphabet Inc.',
     price: 142.56,
-    change: -3.45,
-    changePercent: -2.36,
+    change: '-3.45',
+    changePercent: '-2.36',
     news: [
       {
         title: 'Google faces new antitrust lawsuit',
@@ -70,7 +71,7 @@ const exampleStocks = [
         date: '2024-03-14',
       },
     ],
-    sentiment: 'negative' as const,
+    sentiment: 'negative',
     aiInsight: 'While Google continues to innovate in AI, regulatory challenges and market competition may impact short-term performance.',
     date: '2024-03-15',
   },
@@ -82,7 +83,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSentiment, setSelectedSentiment] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [stocks, setStocks] = useState(exampleStocks);
+  const [stocks, setStocks] = useState<StockAnalysis[]>(exampleStocks);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -111,7 +112,7 @@ export default function Dashboard() {
     return matchesSearch && matchesSentiment;
   });
 
-  const handleNewAnalysis = (analysis: any) => {
+  const handleNewAnalysis = (analysis: StockAnalysis) => {
     setStocks((prevStocks) => [analysis, ...prevStocks]);
   };
 
