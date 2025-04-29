@@ -4,29 +4,42 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { signIn, signInWithGoogle } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage('');
+
     try {
       await signIn(email, password);
-      // Redirect will be handled by the auth state change
-    } catch {
+      router.push('/');
+    } catch (err) {
       setErrorMessage('Failed to sign in. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
+
     try {
       await signInWithGoogle();
-      // Redirect will be handled by the auth state change
-    } catch {
+      router.push('/');
+    } catch (err) {
       setErrorMessage('Failed to sign in with Google.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -34,7 +47,7 @@ export default function Login() {
     <Layout>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
             Sign in to your account
           </h2>
         </div>
@@ -42,7 +55,7 @@ export default function Login() {
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+              <label htmlFor="email" className="block text-sm font-medium leading-6 text-white">
                 Email address
               </label>
               <div className="mt-2">
@@ -61,11 +74,11 @@ export default function Login() {
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                <label htmlFor="password" className="block text-sm font-medium leading-6 text-white">
                   Password
                 </label>
                 <div className="text-sm">
-                  <Link href="/forgot-password" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                  <Link href="/forgot-password" className="font-semibold text-indigo-400 hover:text-indigo-300">
                     Forgot password?
                   </Link>
                 </div>
@@ -85,7 +98,7 @@ export default function Login() {
             </div>
 
             {errorMessage && (
-              <div className="text-sm text-red-600">
+              <div className="text-sm text-red-400">
                 {errorMessage}
               </div>
             )}
@@ -93,9 +106,10 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                disabled={isLoading}
+                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign in
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
             </div>
           </form>
@@ -103,17 +117,18 @@ export default function Login() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-gray-700" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                <span className="bg-gray-900 px-2 text-gray-400">Or continue with</span>
               </div>
             </div>
 
             <div className="mt-6">
               <button
                 onClick={handleGoogleSignIn}
-                className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
+                disabled={isLoading}
+                className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
                   <path
@@ -138,9 +153,9 @@ export default function Login() {
             </div>
           </div>
 
-          <p className="mt-10 text-center text-sm text-gray-500">
+          <p className="mt-10 text-center text-sm text-gray-400">
             Not a member?{' '}
-            <Link href="/signup" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+            <Link href="/signup" className="font-semibold leading-6 text-indigo-400 hover:text-indigo-300">
               Sign up now
             </Link>
           </p>
