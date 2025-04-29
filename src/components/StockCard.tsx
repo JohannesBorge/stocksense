@@ -28,6 +28,7 @@ export default function StockCard({
 }: StockCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [editedAnalysis, setEditedAnalysis] = useState<StockAnalysis>({
     symbol,
     companyName,
@@ -54,11 +55,20 @@ export default function StockCard({
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (onDelete) {
-      onDelete(symbol);
+      setIsDeleting(true);
+      try {
+        await onDelete(symbol);
+      } catch (error) {
+        setIsDeleting(false);
+      }
     }
   };
+
+  if (isDeleting) {
+    return null;
+  }
 
   return (
     <>
