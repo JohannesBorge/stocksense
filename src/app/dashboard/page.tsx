@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
@@ -78,6 +78,8 @@ const exampleStocks = [
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSentiment, setSelectedSentiment] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -99,6 +101,13 @@ export default function Dashboard() {
     return null;
   }
 
+  const filteredStocks = exampleStocks.filter((stock) => {
+    const matchesSearch = stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      stock.companyName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSentiment = !selectedSentiment || stock.sentiment === selectedSentiment;
+    return matchesSearch && matchesSentiment;
+  });
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -109,11 +118,71 @@ export default function Dashboard() {
           </button>
         </div>
 
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search stocks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-md border-0 bg-gray-800 px-4 py-2 text-white shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelectedSentiment(null)}
+              className={`px-4 py-2 rounded-md text-sm font-semibold ${
+                selectedSentiment === null
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setSelectedSentiment('positive')}
+              className={`px-4 py-2 rounded-md text-sm font-semibold ${
+                selectedSentiment === 'positive'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Positive
+            </button>
+            <button
+              onClick={() => setSelectedSentiment('neutral')}
+              className={`px-4 py-2 rounded-md text-sm font-semibold ${
+                selectedSentiment === 'neutral'
+                  ? 'bg-yellow-600 text-white'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Neutral
+            </button>
+            <button
+              onClick={() => setSelectedSentiment('negative')}
+              className={`px-4 py-2 rounded-md text-sm font-semibold ${
+                selectedSentiment === 'negative'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Negative
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {exampleStocks.map((stock) => (
+          {filteredStocks.map((stock) => (
             <StockCard key={stock.symbol} {...stock} />
           ))}
         </div>
+
+        {filteredStocks.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-400">No stocks found matching your criteria.</p>
+          </div>
+        )}
       </div>
     </Layout>
   );

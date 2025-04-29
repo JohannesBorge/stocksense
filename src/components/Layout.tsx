@@ -5,9 +5,10 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', current: true },
+  { name: 'Dashboard', href: '/dashboard', current: true },
   { name: 'Analysis', href: '/analysis', current: false },
   { name: 'Pricing', href: '/pricing', current: false },
 ];
@@ -18,6 +19,16 @@ function classNames(...classes: string[]) {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -75,7 +86,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                           <Menu.Item>
                             {({ active }) => (
                               <button
-                                onClick={() => logout()}
+                                onClick={handleLogout}
                                 className={classNames(
                                   active ? 'bg-gray-600' : '',
                                   'block w-full px-4 py-2 text-left text-sm text-gray-300'
@@ -141,7 +152,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <div className="space-y-1">
                     <Disclosure.Button
                       as="button"
-                      onClick={() => logout()}
+                      onClick={handleLogout}
                       className="block w-full px-4 py-2 text-left text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                     >
                       Sign out

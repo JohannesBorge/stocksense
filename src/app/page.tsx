@@ -1,36 +1,48 @@
+'use client';
+
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <Layout>
-      <div className="relative isolate">
-        {/* Background gradient */}
-        <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
-          <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-600 to-blue-500 opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
-        </div>
-
+      <div className="relative isolate overflow-hidden">
         {/* Hero section */}
-        <div className="py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-                AI-Powered Stock Analysis Made Simple
-              </h1>
-              <p className="mt-6 text-lg leading-8 text-gray-300">
-                Get instant insights into your favorite stocks with our AI-powered analysis platform. Save time and make better investment decisions.
-              </p>
-              <div className="mt-10 flex items-center justify-center gap-x-6">
+        <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
+          <div className="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
+            <h1 className="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl">
+              AI-Powered Stock Analysis
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-gray-300">
+              Get real-time stock analysis, sentiment insights, and AI-powered predictions to make smarter investment decisions.
+            </p>
+            <div className="mt-10 flex items-center gap-x-6">
+              {user ? (
                 <Link
-                  href="/signup"
+                  href="/dashboard"
                   className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                  Get started
+                  Go to Dashboard
                 </Link>
-                <Link href="/login" className="text-sm font-semibold leading-6 text-white">
-                  Sign in <span aria-hidden="true">→</span>
-                </Link>
-              </div>
+              ) : (
+                <>
+                  <Link
+                    href="/signup"
+                    className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  >
+                    Get started
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="text-sm font-semibold leading-6 text-white"
+                  >
+                    Sign in <span aria-hidden="true">→</span>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -38,12 +50,12 @@ export default function Home() {
         {/* Feature section */}
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:text-center">
-            <h2 className="text-base font-semibold leading-7 text-indigo-400">Faster Analysis</h2>
+            <h2 className="text-base font-semibold leading-7 text-indigo-400">Smarter Investing</h2>
             <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Everything you need to analyze stocks
+              Everything you need to make informed decisions
             </p>
             <p className="mt-6 text-lg leading-8 text-gray-300">
-              Our AI-powered platform provides comprehensive stock analysis, news aggregation, and sentiment analysis in seconds.
+              Our AI-powered platform analyzes market trends, news sentiment, and historical data to give you the edge in your investment strategy.
             </p>
           </div>
           <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
@@ -62,26 +74,34 @@ export default function Home() {
           </div>
         </div>
 
-        {/* CTA section */}
-        <div className="mt-32 sm:mt-40">
-          <div className="relative isolate overflow-hidden bg-gray-900 px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
-            <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Start making better investment decisions today
-            </h2>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-300">
-              Join thousands of investors who trust StockSense for their market analysis.
+        {/* Pricing section */}
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-32">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Simple, transparent pricing</h2>
+            <p className="mt-6 text-lg leading-8 text-gray-300">
+              Choose the plan that's right for you
             </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link
-                href="/signup"
-                className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          </div>
+          <div className="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 sm:gap-y-0 lg:max-w-4xl lg:grid-cols-3">
+            {pricingPlans.map((plan) => (
+              <div
+                key={plan.name}
+                className="relative flex flex-col rounded-2xl bg-gray-800 p-8 shadow-xl"
               >
-                Get started
-              </Link>
-              <Link href="/login" className="text-sm font-semibold leading-6 text-white">
-                Sign in <span aria-hidden="true">→</span>
-              </Link>
-            </div>
+                <h3 className="text-lg font-semibold leading-8 text-white">{plan.name}</h3>
+                <p className="mt-4 text-sm leading-6 text-gray-300">{plan.description}</p>
+                <p className="mt-6 flex items-baseline gap-x-1">
+                  <span className="text-4xl font-bold tracking-tight text-white">${plan.price}</span>
+                  <span className="text-sm font-semibold leading-6 text-gray-300">/month</span>
+                </p>
+                <Link
+                  href="/signup"
+                  className="mt-8 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Get started
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -91,15 +111,33 @@ export default function Home() {
 
 const features = [
   {
-    name: 'AI-Powered Analysis',
-    description: 'Get instant insights into stock performance, news sentiment, and market trends using advanced AI technology.',
+    name: 'Real-time Analysis',
+    description: 'Get instant insights into market movements and stock performance with our advanced AI algorithms.',
   },
   {
-    name: 'Real-time News',
-    description: 'Stay updated with the latest news and developments affecting your stocks, aggregated from reliable sources.',
+    name: 'Sentiment Analysis',
+    description: 'Understand market sentiment through news analysis and social media trends to make better decisions.',
   },
   {
-    name: 'Custom Alerts',
-    description: 'Set up personalized alerts for price changes, news updates, and market movements that matter to you.',
+    name: 'AI Predictions',
+    description: 'Leverage machine learning models to predict potential market movements and identify opportunities.',
+  },
+];
+
+const pricingPlans = [
+  {
+    name: 'Basic',
+    description: 'Perfect for individual investors getting started with stock analysis.',
+    price: '29',
+  },
+  {
+    name: 'Pro',
+    description: 'Advanced features for serious investors who need deeper insights.',
+    price: '79',
+  },
+  {
+    name: 'Enterprise',
+    description: 'Custom solutions for professional traders and investment firms.',
+    price: '299',
   },
 ];
