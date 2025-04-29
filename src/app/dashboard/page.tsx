@@ -7,75 +7,7 @@ import Layout from '@/components/Layout';
 import StockCard from '@/components/StockCard';
 import AnalysisModal from '@/components/AnalysisModal';
 import { StockAnalysis } from '@/types/stock';
-
-const exampleStocks: StockAnalysis[] = [
-  {
-    symbol: 'AAPL',
-    companyName: 'Apple Inc.',
-    price: 175.04,
-    change: '2.34',
-    changePercent: '1.35',
-    news: [
-      {
-        title: 'Apple announces new AI features for iOS 18',
-        source: 'TechCrunch',
-        date: '2024-03-15',
-      },
-      {
-        title: 'Apple stock hits new high after strong Q1 earnings',
-        source: 'Bloomberg',
-        date: '2024-03-14',
-      },
-    ],
-    sentiment: 'positive',
-    aiInsight: 'Apple shows strong momentum with recent product announcements and earnings. The company\'s focus on AI integration could drive future growth.',
-    date: '2024-03-15',
-  },
-  {
-    symbol: 'MSFT',
-    companyName: 'Microsoft Corporation',
-    price: 415.32,
-    change: '-1.25',
-    changePercent: '-0.30',
-    news: [
-      {
-        title: 'Microsoft expands Azure cloud services in Europe',
-        source: 'Reuters',
-        date: '2024-03-15',
-      },
-      {
-        title: 'Microsoft partners with OpenAI for new AI initiatives',
-        source: 'The Verge',
-        date: '2024-03-14',
-      },
-    ],
-    sentiment: 'neutral',
-    aiInsight: 'Microsoft maintains strong position in cloud and AI markets. Recent partnerships and expansions show continued growth potential.',
-    date: '2024-03-15',
-  },
-  {
-    symbol: 'GOOGL',
-    companyName: 'Alphabet Inc.',
-    price: 142.56,
-    change: '-3.45',
-    changePercent: '-2.36',
-    news: [
-      {
-        title: 'Google faces new antitrust lawsuit',
-        source: 'Wall Street Journal',
-        date: '2024-03-15',
-      },
-      {
-        title: 'Google announces new AI model Gemini 2.0',
-        source: 'TechCrunch',
-        date: '2024-03-14',
-      },
-    ],
-    sentiment: 'negative',
-    aiInsight: 'While Google continues to innovate in AI, regulatory challenges and market competition may impact short-term performance.',
-    date: '2024-03-15',
-  },
-];
+import { getUserAnalyses } from '@/services/firebase';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -83,7 +15,8 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSentiment, setSelectedSentiment] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [stocks, setStocks] = useState<StockAnalysis[]>(exampleStocks);
+  const [stocks, setStocks] = useState<StockAnalysis[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -91,7 +24,24 @@ export default function Dashboard() {
     }
   }, [user, loading, router]);
 
-  if (loading) {
+  useEffect(() => {
+    const loadAnalyses = async () => {
+      if (user) {
+        try {
+          const analyses = await getUserAnalyses(user.uid);
+          setStocks(analyses);
+        } catch (error) {
+          console.error('Error loading analyses:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadAnalyses();
+  }, [user]);
+
+  if (loading || isLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen">

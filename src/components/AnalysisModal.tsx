@@ -4,6 +4,10 @@ import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { StockData, StockAnalysis } from '@/types/stock';
+import { fetchStockData, fetchCompanyOverview } from '@/services/alphaVantage';
+import { generateStockAnalysis } from '@/services/openai';
+import { saveAnalysis } from '@/services/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AnalysisModalProps {
   isOpen: boolean;
@@ -12,61 +16,72 @@ interface AnalysisModalProps {
 }
 
 export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModalProps) {
+  const { user } = useAuth();
   const [stockSymbol, setStockSymbol] = useState('');
   const [stockData, setStockData] = useState<StockData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Mock function to simulate live stock data updates
-  const fetchStockData = async (symbol: string) => {
-    try {
-      // TODO: Replace with actual API call
-      const mockData: StockData = {
-        symbol,
-        price: Math.random() * 1000,
-        change: (Math.random() * 10 - 5).toFixed(2),
-        changePercent: (Math.random() * 10 - 5).toFixed(2),
-      };
-      setStockData(mockData);
-    } catch {
-      setErrorMessage('Failed to fetch stock data');
-    }
-  };
-
   useEffect(() => {
     if (stockSymbol) {
-      const interval = setInterval(() => {
-        fetchStockData(stockSymbol);
-      }, 5000); // Update every 5 seconds
+      const fetchData = async () => {
+        try {
+          const data = await fetchStockData(stockSymbol);
+          setStockData(data);
+        } catch (error) {
+          setErrorMessage('Failed to fetch stock data');
+        }
+      };
 
+      fetchData();
+      const interval = setInterval(fetchData, 30000); // Update every 30 seconds
       return () => clearInterval(interval);
     }
   }, [stockSymbol]);
 
   const handleSubmit = async () => {
+    if (!user) {
+      setErrorMessage('You must be logged in to generate analysis');
+      return;
+    }
+
     setIsLoading(true);
+    setErrorMessage('');
+
     try {
-      // TODO: Replace with actual OpenAI API call
+      // Fetch latest stock data and company overview
+      const [latestStockData, companyOverview] = await Promise.all([
+        fetchStockData(stockSymbol),
+        fetchCompanyOverview(stockSymbol),
+      ]);
+
+      // Generate AI analysis
+      const { sentiment, aiInsight, news } = await generateStockAnalysis(
+        stockSymbol,
+        latestStockData,
+        companyOverview
+      );
+
+      // Create the analysis object
       const analysis: StockAnalysis = {
         symbol: stockSymbol,
-        companyName: 'Example Company',
-        price: stockData?.price || 0,
-        change: stockData?.change || '0',
-        changePercent: stockData?.changePercent || '0',
-        news: [
-          {
-            title: 'Example news article 1',
-            source: 'Example Source',
-            date: new Date().toISOString().split('T')[0],
-          },
-        ],
-        sentiment: 'positive',
-        aiInsight: 'This is a mock AI analysis. Replace with actual OpenAI response.',
+        companyName: companyOverview.name,
+        price: latestStockData.price,
+        change: latestStockData.change,
+        changePercent: latestStockData.changePercent,
+        news,
+        sentiment,
+        aiInsight,
         date: new Date().toISOString().split('T')[0],
       };
+
+      // Save to Firebase
+      await saveAnalysis(user.uid, analysis);
+
+      // Update UI
       onSave(analysis);
       onClose();
-    } catch {
+    } catch (error) {
       setErrorMessage('Failed to generate analysis');
     } finally {
       setIsLoading(false);
