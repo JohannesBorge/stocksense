@@ -9,6 +9,7 @@ import AnalysisModal from '@/components/AnalysisModal';
 import ChatBox from '@/components/ChatBox';
 import { StockAnalysis } from '@/types/stock';
 import { getUserAnalyses, updateAnalysis, deleteAnalysis } from '@/services/firebase';
+import { fetchStockData } from '@/services/alphaVantage';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -45,6 +46,45 @@ export default function Dashboard() {
 
     loadAnalyses();
   }, [user]);
+
+  // Add live price updates
+  useEffect(() => {
+    if (!stocks.length) return;
+
+    const updatePrices = async () => {
+      try {
+        const updatedStocks = await Promise.all(
+          stocks.map(async (stock) => {
+            try {
+              const latestData = await fetchStockData(stock.symbol);
+              return {
+                ...stock,
+                price: latestData.price,
+                change: latestData.change,
+                changePercent: latestData.changePercent,
+                date: new Date().toISOString().split('T')[0],
+              };
+            } catch (error) {
+              console.error(`Error updating price for ${stock.symbol}:`, error);
+              return stock;
+            }
+          })
+        );
+
+        setStocks(updatedStocks);
+      } catch (error) {
+        console.error('Error updating prices:', error);
+      }
+    };
+
+    // Update prices immediately
+    updatePrices();
+
+    // Then update every 30 seconds
+    const interval = setInterval(updatePrices, 30000);
+
+    return () => clearInterval(interval);
+  }, [stocks.length]);
 
   const handleUpdateAnalysis = async (updatedAnalysis: StockAnalysis) => {
     if (!user) return;
