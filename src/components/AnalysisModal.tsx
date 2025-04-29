@@ -28,7 +28,7 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
         try {
           const data = await fetchStockData(stockSymbol);
           setStockData(data);
-        } catch (error) {
+        } catch {
           setErrorMessage('Failed to fetch stock data');
         }
       };
@@ -81,7 +81,7 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
       // Update UI
       onSave(analysis);
       onClose();
-    } catch (error) {
+    } catch {
       setErrorMessage('Failed to generate analysis');
     } finally {
       setIsLoading(false);

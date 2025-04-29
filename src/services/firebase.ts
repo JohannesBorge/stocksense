@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, query, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { StockAnalysis } from '@/types/stock';
 
 export const saveAnalysis = async (userId: string, analysis: StockAnalysis) => {

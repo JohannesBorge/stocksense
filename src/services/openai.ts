@@ -1,6 +1,13 @@
 import OpenAI from 'openai';
 import { StockData } from '@/types/stock';
 
+interface CompanyOverview {
+  name: string;
+  description: string;
+  sector: string;
+  industry: string;
+}
+
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
@@ -8,7 +15,7 @@ const openai = new OpenAI({
 export const generateStockAnalysis = async (
   symbol: string,
   stockData: StockData,
-  companyOverview: any
+  companyOverview: CompanyOverview
 ): Promise<{
   sentiment: 'positive' | 'neutral' | 'negative';
   aiInsight: string;
