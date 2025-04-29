@@ -60,7 +60,7 @@ export default function StockCard({
       setIsDeleting(true);
       try {
         await onDelete(symbol);
-      } catch (error) {
+      } catch {
         setIsDeleting(false);
       }
     }
