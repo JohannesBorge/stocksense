@@ -28,27 +28,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+    // Only set up auth state listener if we have Firebase config
+    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        setLoading(false);
+      });
 
-    return unsubscribe;
+      return unsubscribe;
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+      throw new Error('Firebase configuration is missing');
+    }
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signUp = async (email: string, password: string) => {
+    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+      throw new Error('Firebase configuration is missing');
+    }
     await createUserWithEmailAndPassword(auth, email, password);
   };
 
   const logout = async () => {
+    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+      throw new Error('Firebase configuration is missing');
+    }
     await signOut(auth);
   };
 
   const signInWithGoogle = async () => {
+    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+      throw new Error('Firebase configuration is missing');
+    }
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
   };
