@@ -79,7 +79,7 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Simple, transparent pricing</h2>
             <p className="mt-6 text-lg leading-8 text-gray-300">
-              Choose the plan that's right for you
+              Choose the plan that&apos;s right for you
             </p>
           </div>
           <div className="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 sm:gap-y-0 lg:max-w-4xl lg:grid-cols-3">
