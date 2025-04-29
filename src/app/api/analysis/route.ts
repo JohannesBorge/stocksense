@@ -21,6 +21,14 @@ export async function POST(request: Request) {
       companyOverview: CompanyOverview;
     } = await request.json();
 
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OpenAI API key is not set');
+      return NextResponse.json(
+        { error: 'OpenAI API key is not configured' },
+        { status: 500 }
+      );
+    }
+
     const prompt = `Analyze the following stock data and provide insights:
 Symbol: ${symbol}
 Current Price: $${stockData.price}
@@ -48,16 +56,24 @@ Format the response as JSON with the following structure:
   ]
 }`;
 
+    console.log('Sending request to OpenAI...');
     const completion = await openai.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
       model: 'gpt-4-turbo-preview',
       response_format: { type: 'json_object' },
     });
 
+    console.log('Received response from OpenAI');
     const response = JSON.parse(completion.choices[0].message.content || '{}');
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Error generating analysis:', error);
+    console.error('Error in OpenAI API route:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to generate analysis' },
       { status: 500 }

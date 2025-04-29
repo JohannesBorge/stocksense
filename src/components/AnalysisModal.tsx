@@ -56,11 +56,24 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
       ]);
 
       // Generate AI analysis
-      const { sentiment, aiInsight, news } = await generateStockAnalysis(
-        stockSymbol,
-        latestStockData,
-        companyOverview
-      );
+      const response = await fetch('/api/analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symbol: stockSymbol,
+          stockData: latestStockData,
+          companyOverview,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate analysis');
+      }
+
+      const { sentiment, aiInsight, news } = await response.json();
 
       // Create the analysis object
       const analysis: StockAnalysis = {
@@ -81,8 +94,9 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
       // Update UI
       onSave(analysis);
       onClose();
-    } catch {
-      setErrorMessage('Failed to generate analysis');
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to generate analysis');
     } finally {
       setIsLoading(false);
     }
