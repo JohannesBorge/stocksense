@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stocks, setStocks] = useState<StockAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,7 +53,10 @@ export default function Dashboard() {
     if (!stocks.length) return;
 
     const updatePrices = async () => {
+      if (isUpdatingPrices) return; // Prevent concurrent updates
+      
       try {
+        setIsUpdatingPrices(true);
         const updatedStocks = await Promise.all(
           stocks.map(async (stock) => {
             try {
@@ -66,6 +70,11 @@ export default function Dashboard() {
               };
             } catch (error) {
               console.error(`Error updating price for ${stock.symbol}:`, error);
+              // If we hit rate limits, keep the old price
+              if (error instanceof Error && error.message.includes('rate limit')) {
+                setError('Rate limit reached. Prices will update when available.');
+                return stock;
+              }
               return stock;
             }
           })
@@ -74,17 +83,22 @@ export default function Dashboard() {
         setStocks(updatedStocks);
       } catch (error) {
         console.error('Error updating prices:', error);
+        if (error instanceof Error && error.message.includes('rate limit')) {
+          setError('Rate limit reached. Prices will update when available.');
+        }
+      } finally {
+        setIsUpdatingPrices(false);
       }
     };
 
     // Update prices immediately
     updatePrices();
 
-    // Then update every 30 seconds
-    const interval = setInterval(updatePrices, 30000);
+    // Then update every 1 second
+    const interval = setInterval(updatePrices, 1000);
 
     return () => clearInterval(interval);
-  }, [stocks.length]);
+  }, [stocks.length, isUpdatingPrices]);
 
   const handleUpdateAnalysis = async (updatedAnalysis: StockAnalysis) => {
     if (!user) return;
@@ -144,12 +158,19 @@ export default function Dashboard() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-white">Stock Analysis Dashboard</h1>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-          >
-            New Analysis
-          </button>
+          <div className="flex items-center space-x-4">
+            {isUpdatingPrices && (
+              <div className="text-sm text-gray-400">
+                Updating prices...
+              </div>
+            )}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+            >
+              New Analysis
+            </button>
+          </div>
         </div>
 
         {error && (
