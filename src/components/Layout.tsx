@@ -5,12 +5,12 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', current: true },
-  { name: 'Analysis', href: '/analysis', current: false },
-  { name: 'Pricing', href: '/pricing', current: false },
+  { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Analysis', href: '/analysis' },
+  { name: 'Pricing', href: '/pricing' },
 ];
 
 function classNames(...classes: string[]) {
@@ -20,6 +20,7 @@ function classNames(...classes: string[]) {
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
@@ -49,7 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         key={item.name}
                         href={item.href}
                         className={classNames(
-                          item.current
+                          pathname === item.href
                             ? 'border-indigo-400 text-white'
                             : 'border-transparent text-gray-300 hover:border-gray-300 hover:text-white',
                           'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
@@ -137,7 +138,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     as="a"
                     href={item.href}
                     className={classNames(
-                      item.current
+                      pathname === item.href
                         ? 'bg-gray-700 border-indigo-400 text-white'
                         : 'border-transparent text-gray-300 hover:bg-gray-700 hover:border-gray-300 hover:text-white',
                       'block border-l-4 py-2 pl-3 pr-4 text-base font-medium'
