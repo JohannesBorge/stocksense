@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { StockAnalysis } from '@/types/stock';
-import { ArrowUpIcon, ArrowDownIcon, PencilIcon, EllipsisHorizontalIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { ArrowUpIcon, ArrowDownIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { Fragment } from 'react';
 
