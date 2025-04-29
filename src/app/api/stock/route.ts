@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cache } from '@/services/cache';
 
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
 const BASE_URL = 'https://www.alphavantage.co/query';
@@ -64,6 +65,29 @@ function getDataLimit(range: TimeRange): number {
   }
 }
 
+function getCacheTTL(range: TimeRange): number {
+  switch (range) {
+    case '1d':
+      return 5 * 60 * 1000; // 5 minutes
+    case '1w':
+      return 15 * 60 * 1000; // 15 minutes
+    case '1m':
+      return 30 * 60 * 1000; // 30 minutes
+    case '3m':
+    case '6m':
+      return 60 * 60 * 1000; // 1 hour
+    case 'ytd':
+    case '1y':
+    case '3y':
+    case '5y':
+    case '10y':
+    case 'max':
+      return 24 * 60 * 60 * 1000; // 24 hours
+    default:
+      return 5 * 60 * 1000; // 5 minutes
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -79,6 +103,13 @@ export async function GET(request: Request) {
     }
 
     if (type === 'historical') {
+      // Check cache first
+      const cacheKey = `historical_${symbol}_${range}`;
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        return NextResponse.json(cachedData);
+      }
+
       const timeSeriesFunction = getTimeSeriesFunction(range);
       const response = await fetch(
         `${BASE_URL}?function=${timeSeriesFunction}&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
@@ -129,6 +160,9 @@ export async function GET(request: Request) {
           price: parseFloat(values['4. close']),
         }))
         .reverse();
+
+      // Cache the data
+      cache.set(cacheKey, historicalData, getCacheTTL(range));
 
       return NextResponse.json(historicalData);
     }
