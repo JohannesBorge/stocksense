@@ -6,8 +6,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 import StockCard from '@/components/StockCard';
 import AnalysisModal from '@/components/AnalysisModal';
+import ChatBox from '@/components/ChatBox';
 import { StockAnalysis } from '@/types/stock';
-import { getUserAnalyses } from '@/services/firebase';
+import { getUserAnalyses, updateAnalysis } from '@/services/firebase';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -44,6 +45,22 @@ export default function Dashboard() {
 
     loadAnalyses();
   }, [user]);
+
+  const handleUpdateAnalysis = async (updatedAnalysis: StockAnalysis) => {
+    if (!user) return;
+
+    try {
+      await updateAnalysis(user.uid, updatedAnalysis);
+      setStocks(prevStocks =>
+        prevStocks.map(stock =>
+          stock.symbol === updatedAnalysis.symbol ? updatedAnalysis : stock
+        )
+      );
+    } catch (error) {
+      console.error('Error updating analysis:', error);
+      setError('Failed to update analysis. Please try again.');
+    }
+  };
 
   if (authLoading || isLoading) {
     return (
@@ -152,7 +169,11 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredStocks.map((stock) => (
-            <StockCard key={stock.symbol} {...stock} />
+            <StockCard
+              key={stock.symbol}
+              {...stock}
+              onUpdate={handleUpdateAnalysis}
+            />
           ))}
         </div>
 
@@ -167,6 +188,8 @@ export default function Dashboard() {
           onClose={() => setIsModalOpen(false)}
           onSave={handleNewAnalysis}
         />
+
+        <ChatBox />
       </div>
     </Layout>
   );
