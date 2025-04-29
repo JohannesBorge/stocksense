@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, getDocs, orderBy, Timestamp, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, query, getDocs, orderBy, Timestamp, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { StockAnalysis } from '@/types/stock';
 
 export const saveAnalysis = async (userId: string, analysis: StockAnalysis) => {
@@ -42,12 +42,13 @@ export const deleteAnalysis = async (userId: string, symbol: string) => {
     const q = query(analysesRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
-    const docRef = querySnapshot.docs.find(doc => doc.data().symbol === symbol);
-    if (!docRef) {
+    const docToDelete = querySnapshot.docs.find(doc => doc.data().symbol === symbol);
+    if (!docToDelete) {
       throw new Error('Analysis not found');
     }
 
-    await deleteDoc(docRef.ref);
+    const docRef = doc(db, 'users', userId, 'analyses', docToDelete.id);
+    await deleteDoc(docRef);
   } catch (error) {
     console.error('Error deleting analysis:', error);
     throw error;
