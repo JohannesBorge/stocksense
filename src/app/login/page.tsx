@@ -16,7 +16,7 @@ export default function Login() {
     try {
       await signIn(email, password);
       // Redirect will be handled by the auth state change
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to sign in. Please check your credentials.');
     }
   };
@@ -25,7 +25,7 @@ export default function Login() {
     try {
       await signInWithGoogle();
       // Redirect will be handled by the auth state change
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to sign in with Google.');
     }
   };

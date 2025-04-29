@@ -21,7 +21,7 @@ export default function SignUp() {
     try {
       await signUp(email, password);
       // Redirect will be handled by the auth state change
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to create an account.');
     }
   };
@@ -30,7 +30,7 @@ export default function SignUp() {
     try {
       await signInWithGoogle();
       // Redirect will be handled by the auth state change
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to sign in with Google.');
     }
   };
