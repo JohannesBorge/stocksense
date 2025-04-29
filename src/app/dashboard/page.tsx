@@ -19,7 +19,6 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stocks, setStocks] = useState<StockAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,10 +52,7 @@ export default function Dashboard() {
     if (!stocks.length) return;
 
     const updatePrices = async () => {
-      if (isUpdatingPrices) return; // Prevent concurrent updates
-      
       try {
-        setIsUpdatingPrices(true);
         const updatedStocks = await Promise.all(
           stocks.map(async (stock) => {
             try {
@@ -86,8 +82,6 @@ export default function Dashboard() {
         if (error instanceof Error && error.message.includes('rate limit')) {
           setError('Rate limit reached. Prices will update when available.');
         }
-      } finally {
-        setIsUpdatingPrices(false);
       }
     };
 
@@ -98,7 +92,7 @@ export default function Dashboard() {
     const interval = setInterval(updatePrices, 1000);
 
     return () => clearInterval(interval);
-  }, [stocks.length, isUpdatingPrices]);
+  }, [stocks.length]);
 
   const handleUpdateAnalysis = async (updatedAnalysis: StockAnalysis) => {
     if (!user) return;
@@ -159,11 +153,6 @@ export default function Dashboard() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-white">Stock Analysis Dashboard</h1>
           <div className="flex items-center space-x-4">
-            {isUpdatingPrices && (
-              <div className="text-sm text-gray-400">
-                Updating prices...
-              </div>
-            )}
             <button
               onClick={() => setIsModalOpen(true)}
               className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
