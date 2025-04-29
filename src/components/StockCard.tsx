@@ -62,47 +62,6 @@ export default function StockCard({
   return (
     <>
       <div className="bg-gray-800 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-700 relative">
-        <div className="absolute top-4 right-4 z-10">
-          <Menu as="div" className="relative">
-            <Menu.Button
-              onClick={(e) => e.stopPropagation()}
-              className="p-1 rounded-full hover:bg-gray-700 focus:outline-none"
-            >
-              <EllipsisHorizontalIcon className="h-5 w-5 text-gray-400" />
-            </Menu.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
-                <div className="py-1">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete();
-                        }}
-                        className={`${
-                          active ? 'bg-gray-600' : ''
-                        } flex w-full items-center px-4 py-2 text-sm text-red-400`}
-                      >
-                        <TrashIcon className="h-4 w-4 mr-2" />
-                        Delete
-                      </button>
-                    )}
-                  </Menu.Item>
-                </div>
-              </Menu.Items>
-            </Transition>
-          </Menu>
-        </div>
-
         <div 
           className="cursor-pointer"
           onClick={() => !isEditing && setIsExpanded(true)}
@@ -140,6 +99,47 @@ export default function StockCard({
           <div className="mt-4 text-xs text-gray-500">
             Last updated: {date}
           </div>
+        </div>
+
+        <div className="absolute bottom-4 right-4 z-10">
+          <Menu as="div" className="relative">
+            <Menu.Button
+              onClick={(e) => e.stopPropagation()}
+              className="p-1 rounded-full hover:bg-gray-700 focus:outline-none"
+            >
+              <EllipsisHorizontalIcon className="h-5 w-5 text-gray-400" />
+            </Menu.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute right-0 bottom-full mb-2 w-48 origin-bottom-right rounded-md bg-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+                <div className="py-1">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete();
+                        }}
+                        className={`${
+                          active ? 'bg-gray-600' : ''
+                        } flex w-full items-center px-4 py-2 text-sm text-red-400`}
+                      >
+                        <TrashIcon className="h-4 w-4 mr-2" />
+                        Delete
+                      </button>
+                    )}
+                  </Menu.Item>
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
         </div>
       </div>
 
