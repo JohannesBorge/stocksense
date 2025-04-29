@@ -3,6 +3,14 @@ import { NextResponse } from 'next/server';
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
 const BASE_URL = 'https://www.alphavantage.co/query';
 
+interface TimeSeriesData {
+  '1. open': string;
+  '2. high': string;
+  '3. low': string;
+  '4. close': string;
+  '5. volume': string;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -26,7 +34,7 @@ export async function GET(request: Request) {
       }
 
       const data = await response.json();
-      const timeSeriesData = data['Time Series (Daily)'];
+      const timeSeriesData = data['Time Series (Daily)'] as Record<string, TimeSeriesData>;
 
       if (!timeSeriesData) {
         return NextResponse.json(
@@ -38,7 +46,7 @@ export async function GET(request: Request) {
       // Get the last 30 days of data
       const historicalData = Object.entries(timeSeriesData)
         .slice(0, 30)
-        .map(([date, values]: [string, any]) => ({
+        .map(([date, values]) => ({
           date,
           price: parseFloat(values['4. close']),
         }))

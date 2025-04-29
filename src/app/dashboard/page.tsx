@@ -92,7 +92,7 @@ export default function Dashboard() {
     const interval = setInterval(updatePrices, 1000);
 
     return () => clearInterval(interval);
-  }, [stocks.length]);
+  }, [stocks]);
 
   const handleUpdateAnalysis = async (updatedAnalysis: StockAnalysis) => {
     if (!user) return;
