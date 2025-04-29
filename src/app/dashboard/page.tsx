@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 import StockCard from '@/components/StockCard';
+import AnalysisModal from '@/components/AnalysisModal';
 
 const exampleStocks = [
   {
@@ -80,6 +81,8 @@ export default function Dashboard() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSentiment, setSelectedSentiment] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [stocks, setStocks] = useState(exampleStocks);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -101,19 +104,26 @@ export default function Dashboard() {
     return null;
   }
 
-  const filteredStocks = exampleStocks.filter((stock) => {
+  const filteredStocks = stocks.filter((stock) => {
     const matchesSearch = stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
       stock.companyName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSentiment = !selectedSentiment || stock.sentiment === selectedSentiment;
     return matchesSearch && matchesSentiment;
   });
 
+  const handleNewAnalysis = (analysis: any) => {
+    setStocks((prevStocks) => [analysis, ...prevStocks]);
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-white">Stock Analysis Dashboard</h1>
-          <button className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+          >
             New Analysis
           </button>
         </div>
@@ -183,6 +193,12 @@ export default function Dashboard() {
             <p className="text-gray-400">No stocks found matching your criteria.</p>
           </div>
         )}
+
+        <AnalysisModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleNewAnalysis}
+        />
       </div>
     </Layout>
   );

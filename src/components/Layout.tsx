@@ -104,7 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className="space-x-4">
                       <Link
                         href="/login"
-                        className="text-white hover:text-gray-300"
+                        className="rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-600"
                       >
                         Sign in
                       </Link>
