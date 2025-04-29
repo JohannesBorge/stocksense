@@ -10,28 +10,32 @@ import { StockAnalysis } from '@/types/stock';
 import { getUserAnalyses } from '@/services/firebase';
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSentiment, setSelectedSentiment] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stocks, setStocks] = useState<StockAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       router.push('/login');
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     const loadAnalyses = async () => {
       if (user) {
         try {
+          setIsLoading(true);
+          setError(null);
           const analyses = await getUserAnalyses(user.uid);
           setStocks(analyses);
-        } catch (error) {
-          console.error('Error loading analyses:', error);
+        } catch (err) {
+          console.error('Error loading analyses:', err);
+          setError('Failed to load stock analyses. Please try again later.');
         } finally {
           setIsLoading(false);
         }
@@ -41,7 +45,7 @@ export default function Dashboard() {
     loadAnalyses();
   }, [user]);
 
-  if (loading || isLoading) {
+  if (authLoading || isLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen">
@@ -78,6 +82,19 @@ export default function Dashboard() {
             New Analysis
           </button>
         </div>
+
+        {error && (
+          <div className="rounded-md bg-red-500/10 p-4">
+            <div className="flex">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-400">Error</h3>
+                <div className="mt-2 text-sm text-red-400">
+                  <p>{error}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
@@ -139,7 +156,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {filteredStocks.length === 0 && (
+        {!error && filteredStocks.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-400">No stocks found matching your criteria.</p>
           </div>
