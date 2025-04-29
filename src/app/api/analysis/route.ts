@@ -55,7 +55,7 @@ Format the response as JSON with the following structure:
     console.log('Sending request to OpenAI...');
     const completion = await openai.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4-turbo-preview-2024-02-15',
       response_format: { type: 'json_object' },
     });
 
