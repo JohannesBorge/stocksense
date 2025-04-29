@@ -75,7 +75,7 @@ export default function Home() {
     <Layout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Stock Analysis Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-white">Stock Analysis Dashboard</h1>
           <button className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
             New Analysis
           </button>
