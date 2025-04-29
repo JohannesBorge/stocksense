@@ -21,10 +21,21 @@ export const getUserAnalyses = async (userId: string) => {
     const q = query(analysesRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as StockAnalysis[];
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        symbol: data.symbol,
+        companyName: data.companyName,
+        price: data.price,
+        change: data.change,
+        changePercent: data.changePercent,
+        news: data.news,
+        sentiment: data.sentiment,
+        aiInsight: data.aiInsight,
+        date: data.date,
+      } as StockAnalysis;
+    });
   } catch (error) {
     console.error('Error fetching analyses:', error);
     throw error;
