@@ -30,7 +30,8 @@ export const generateStockAnalysis = async (
     });
 
     if (!response.ok) {
-      throw new Error('Failed to generate analysis');
+      const errorData = await response.json();
+      throw new Error(errorData.details || 'Failed to generate analysis');
     }
 
     const data = await response.json();

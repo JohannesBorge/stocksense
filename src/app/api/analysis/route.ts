@@ -21,13 +21,9 @@ export async function POST(request: Request) {
       companyOverview: CompanyOverview;
     } = await request.json();
 
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OpenAI API key is not set');
-      return NextResponse.json(
-        { error: 'OpenAI API key is not configured' },
-        { status: 500 }
-      );
-    }
+    console.log('Received request for symbol:', symbol);
+    console.log('Stock data:', stockData);
+    console.log('Company overview:', companyOverview);
 
     const prompt = `Analyze the following stock data and provide insights:
 Symbol: ${symbol}
@@ -67,15 +63,16 @@ Format the response as JSON with the following structure:
     const response = JSON.parse(completion.choices[0].message.content || '{}');
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Error in OpenAI API route:', error);
+    console.error('Error generating analysis:', error);
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
     }
     return NextResponse.json(
-      { error: 'Failed to generate analysis' },
+      { error: 'Failed to generate analysis', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
