@@ -89,6 +89,23 @@ export async function GET(request: Request) {
       }
 
       const data = await response.json();
+
+      // Check for API rate limit
+      if (data.Note && data.Note.includes('API call frequency')) {
+        return NextResponse.json(
+          { error: 'API rate limit reached. Please try again in a minute.' },
+          { status: 429 }
+        );
+      }
+
+      // Check for invalid symbol
+      if (data.Error) {
+        return NextResponse.json(
+          { error: 'Invalid stock symbol' },
+          { status: 400 }
+        );
+      }
+
       const timeSeriesKey = timeSeriesFunction.includes('INTRADAY')
         ? `Time Series (5min)`
         : timeSeriesFunction.includes('ADJUSTED')
@@ -99,8 +116,8 @@ export async function GET(request: Request) {
 
       if (!timeSeriesData) {
         return NextResponse.json(
-          { error: 'Invalid stock symbol' },
-          { status: 400 }
+          { error: 'No data available for this time range' },
+          { status: 404 }
         );
       }
 
@@ -126,6 +143,14 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json();
+
+    // Check for API rate limit
+    if (data.Note && data.Note.includes('API call frequency')) {
+      return NextResponse.json(
+        { error: 'API rate limit reached. Please try again in a minute.' },
+        { status: 429 }
+      );
+    }
 
     if (type === 'overview') {
       return NextResponse.json({
@@ -153,7 +178,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching stock data:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch stock data' },
+      { error: 'Failed to fetch stock data. Please try again later.' },
       { status: 500 }
     );
   }

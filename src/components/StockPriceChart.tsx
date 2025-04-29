@@ -41,6 +41,7 @@ export default function StockPriceChart({ symbol }: StockPriceChartProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRange, setSelectedRange] = useState<TimeRange>('1m');
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const fetchHistoricalData = async () => {
@@ -48,28 +49,50 @@ export default function StockPriceChart({ symbol }: StockPriceChartProps) {
         setIsLoading(true);
         setError(null);
         const response = await fetch(`/api/stock?symbol=${symbol}&type=historical&range=${selectedRange}`);
+        const data = await response.json();
+
         if (!response.ok) {
-          throw new Error('Failed to fetch historical data');
+          if (response.status === 429) {
+            // Rate limit hit, retry after 1 minute
+            if (retryCount < 3) {
+              setTimeout(() => {
+                setRetryCount(prev => prev + 1);
+              }, 60000);
+              setError('Rate limit reached. Retrying in 1 minute...');
+            } else {
+              setError('Rate limit reached. Please try again later.');
+            }
+            return;
+          }
+          throw new Error(data.error || 'Failed to fetch historical data');
         }
-        const historicalData = await response.json();
-        setData(historicalData);
+
+        setData(data);
+        setRetryCount(0);
       } catch (err) {
         console.error('Error fetching historical data:', err);
-        setError('Failed to load historical data');
+        setError(err instanceof Error ? err.message : 'Failed to load historical data');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchHistoricalData();
-  }, [symbol, selectedRange]);
+  }, [symbol, selectedRange, retryCount]);
 
   if (isLoading) {
     return <div className="h-64 flex items-center justify-center text-gray-400">Loading chart...</div>;
   }
 
   if (error) {
-    return <div className="h-64 flex items-center justify-center text-red-400">{error}</div>;
+    return (
+      <div className="h-64 flex flex-col items-center justify-center text-red-400 space-y-2">
+        <p>{error}</p>
+        {error.includes('Rate limit') && retryCount < 3 && (
+          <p className="text-sm text-gray-400">Retrying automatically...</p>
+        )}
+      </div>
+    );
   }
 
   if (!data.length) {
