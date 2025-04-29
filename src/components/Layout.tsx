@@ -104,7 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className="space-x-4">
                       <Link
                         href="/login"
-                        className="text-gray-300 hover:text-white"
+                        className="text-white hover:text-gray-300"
                       >
                         Sign in
                       </Link>
@@ -164,14 +164,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <Disclosure.Button
                       as="a"
                       href="/login"
-                      className="block px-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                      className="block px-4 py-2 text-base font-medium text-white hover:bg-gray-700 hover:text-gray-300"
                     >
                       Sign in
                     </Disclosure.Button>
                     <Disclosure.Button
                       as="a"
                       href="/signup"
-                      className="block px-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                      className="block px-4 py-2 text-base font-medium text-white hover:bg-gray-700 hover:text-gray-300"
                     >
                       Sign up
                     </Disclosure.Button>
