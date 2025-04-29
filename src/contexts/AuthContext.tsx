@@ -28,45 +28,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Only set up auth state listener if we have Firebase config
-    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        setUser(user);
-        setLoading(false);
-      });
-
-      return unsubscribe;
-    } else {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
       setLoading(false);
-    }
+    });
+
+    return unsubscribe;
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      throw new Error('Firebase configuration is missing');
-    }
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signUp = async (email: string, password: string) => {
-    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      throw new Error('Firebase configuration is missing');
-    }
     await createUserWithEmailAndPassword(auth, email, password);
   };
 
   const logout = async () => {
-    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      throw new Error('Firebase configuration is missing');
-    }
     await signOut(auth);
   };
 
   const signInWithGoogle = async () => {
-    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      throw new Error('Firebase configuration is missing');
-    }
     const provider = new GoogleAuthProvider();
+    // Add scopes
+    provider.addScope('profile');
+    provider.addScope('email');
+    // Set custom parameters
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
     await signInWithPopup(auth, provider);
   };
 
