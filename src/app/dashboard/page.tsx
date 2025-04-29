@@ -8,7 +8,7 @@ import StockCard from '@/components/StockCard';
 import AnalysisModal from '@/components/AnalysisModal';
 import ChatBox from '@/components/ChatBox';
 import { StockAnalysis } from '@/types/stock';
-import { getUserAnalyses, updateAnalysis } from '@/services/firebase';
+import { getUserAnalyses, updateAnalysis, deleteAnalysis } from '@/services/firebase';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -59,6 +59,18 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error updating analysis:', error);
       setError('Failed to update analysis. Please try again.');
+    }
+  };
+
+  const handleDeleteAnalysis = async (symbol: string) => {
+    if (!user) return;
+
+    try {
+      await deleteAnalysis(user.uid, symbol);
+      setStocks(prevStocks => prevStocks.filter(stock => stock.symbol !== symbol));
+    } catch (error) {
+      console.error('Error deleting analysis:', error);
+      setError('Failed to delete analysis. Please try again.');
     }
   };
 
@@ -173,6 +185,7 @@ export default function Dashboard() {
               key={stock.symbol}
               {...stock}
               onUpdate={handleUpdateAnalysis}
+              onDelete={handleDeleteAnalysis}
             />
           ))}
         </div>

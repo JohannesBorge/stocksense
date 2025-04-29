@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, getDocs, orderBy, Timestamp, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, query, getDocs, orderBy, Timestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { StockAnalysis } from '@/types/stock';
 
 export const saveAnalysis = async (userId: string, analysis: StockAnalysis) => {
@@ -32,6 +32,24 @@ export const updateAnalysis = async (userId: string, analysis: StockAnalysis) =>
     });
   } catch (error) {
     console.error('Error updating analysis:', error);
+    throw error;
+  }
+};
+
+export const deleteAnalysis = async (userId: string, symbol: string) => {
+  try {
+    const analysesRef = collection(db, 'users', userId, 'analyses');
+    const q = query(analysesRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    const docRef = querySnapshot.docs.find(doc => doc.data().symbol === symbol);
+    if (!docRef) {
+      throw new Error('Analysis not found');
+    }
+
+    await deleteDoc(docRef.ref);
+  } catch (error) {
+    console.error('Error deleting analysis:', error);
     throw error;
   }
 };
