@@ -8,7 +8,7 @@ import Link from 'next/link';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const { signIn, signInWithGoogle } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,8 +16,8 @@ export default function Login() {
     try {
       await signIn(email, password);
       // Redirect will be handled by the auth state change
-    } catch (error) {
-      setError('Failed to sign in. Please check your credentials.');
+    } catch (err) {
+      setErrorMessage('Failed to sign in. Please check your credentials.');
     }
   };
 
@@ -25,8 +25,8 @@ export default function Login() {
     try {
       await signInWithGoogle();
       // Redirect will be handled by the auth state change
-    } catch (error) {
-      setError('Failed to sign in with Google.');
+    } catch (err) {
+      setErrorMessage('Failed to sign in with Google.');
     }
   };
 
@@ -84,9 +84,9 @@ export default function Login() {
               </div>
             </div>
 
-            {error && (
+            {errorMessage && (
               <div className="text-sm text-red-600">
-                {error}
+                {errorMessage}
               </div>
             )}
 

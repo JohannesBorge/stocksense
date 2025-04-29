@@ -9,20 +9,20 @@ export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const { signUp, signInWithGoogle } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setErrorMessage('Passwords do not match');
       return;
     }
     try {
       await signUp(email, password);
       // Redirect will be handled by the auth state change
-    } catch (error) {
-      setError('Failed to create an account.');
+    } catch (err) {
+      setErrorMessage('Failed to create an account.');
     }
   };
 
@@ -30,8 +30,8 @@ export default function SignUp() {
     try {
       await signInWithGoogle();
       // Redirect will be handled by the auth state change
-    } catch (error) {
-      setError('Failed to sign in with Google.');
+    } catch (err) {
+      setErrorMessage('Failed to sign in with Google.');
     }
   };
 
@@ -100,9 +100,9 @@ export default function SignUp() {
               </div>
             </div>
 
-            {error && (
+            {errorMessage && (
               <div className="text-sm text-red-600">
-                {error}
+                {errorMessage}
               </div>
             )}
 
