@@ -16,6 +16,37 @@ export async function GET(request: Request) {
       );
     }
 
+    if (type === 'historical') {
+      const response = await fetch(
+        `${BASE_URL}?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch historical data');
+      }
+
+      const data = await response.json();
+      const timeSeriesData = data['Time Series (Daily)'];
+
+      if (!timeSeriesData) {
+        return NextResponse.json(
+          { error: 'Invalid stock symbol' },
+          { status: 400 }
+        );
+      }
+
+      // Get the last 30 days of data
+      const historicalData = Object.entries(timeSeriesData)
+        .slice(0, 30)
+        .map(([date, values]: [string, any]) => ({
+          date,
+          price: parseFloat(values['4. close']),
+        }))
+        .reverse();
+
+      return NextResponse.json(historicalData);
+    }
+
     const endpoint = type === 'overview' ? 'OVERVIEW' : 'GLOBAL_QUOTE';
     const response = await fetch(
       `${BASE_URL}?function=${endpoint}&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`

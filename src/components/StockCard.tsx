@@ -6,6 +6,7 @@ import { ArrowUpIcon, ArrowDownIcon, PencilIcon, TrashIcon } from '@heroicons/re
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { Fragment } from 'react';
+import StockPriceChart from './StockPriceChart';
 
 type StockCardProps = StockAnalysis & {
   onUpdate?: (updatedAnalysis: StockAnalysis) => void;
@@ -220,6 +221,12 @@ export default function StockCard({
                         <div>
                           <h4 className="text-sm font-medium text-white">AI Insight</h4>
                           <p className="mt-1 text-sm text-gray-400">{aiInsight}</p>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-white">Price History</h4>
+                          <div className="mt-2">
+                            <StockPriceChart symbol={symbol} />
+                          </div>
                         </div>
                         <div>
                           <h4 className="text-sm font-medium text-white">Latest News</h4>
