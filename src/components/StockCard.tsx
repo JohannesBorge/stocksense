@@ -60,11 +60,8 @@ export default function StockCard({
 
   return (
     <>
-      <div 
-        className="bg-gray-800 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-700 cursor-pointer relative"
-        onClick={() => !isEditing && setIsExpanded(true)}
-      >
-        <div className="absolute top-4 right-4">
+      <div className="bg-gray-800 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-700 relative">
+        <div className="absolute top-4 right-4 z-10">
           <Menu as="div" className="relative">
             <Menu.Button
               onClick={(e) => e.stopPropagation()}
@@ -81,7 +78,7 @@ export default function StockCard({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
                 <div className="py-1">
                   <Menu.Item>
                     {({ active }) => (
@@ -105,38 +102,43 @@ export default function StockCard({
           </Menu>
         </div>
 
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-lg font-semibold text-white">{symbol}</h3>
-            <p className="text-sm text-gray-400">{companyName}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-lg font-semibold text-white">${price.toFixed(2)}</p>
-            <div className="flex items-center justify-end">
-              {isPositive ? (
-                <ArrowUpIcon className="h-4 w-4 text-green-400" />
-              ) : (
-                <ArrowDownIcon className="h-4 w-4 text-red-400" />
-              )}
-              <span
-                className={`text-sm font-medium ${
-                  isPositive ? 'text-green-400' : 'text-red-400'
-                }`}
-              >
-                {change} ({changePercent}%)
-              </span>
+        <div 
+          className="cursor-pointer"
+          onClick={() => !isEditing && setIsExpanded(true)}
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold text-white">{symbol}</h3>
+              <p className="text-sm text-gray-400">{companyName}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-semibold text-white">${price.toFixed(2)}</p>
+              <div className="flex items-center justify-end">
+                {isPositive ? (
+                  <ArrowUpIcon className="h-4 w-4 text-green-400" />
+                ) : (
+                  <ArrowDownIcon className="h-4 w-4 text-red-400" />
+                )}
+                <span
+                  className={`text-sm font-medium ${
+                    isPositive ? 'text-green-400' : 'text-red-400'
+                  }`}
+                >
+                  {change} ({changePercent}%)
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-4">
-          <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${sentimentColors[sentiment]}`}>
-            {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)} Sentiment
+          <div className="mt-4">
+            <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${sentimentColors[sentiment]}`}>
+              {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)} Sentiment
+            </div>
           </div>
-        </div>
 
-        <div className="mt-4 text-xs text-gray-500">
-          Last updated: {date}
+          <div className="mt-4 text-xs text-gray-500">
+            Last updated: {date}
+          </div>
         </div>
       </div>
 
