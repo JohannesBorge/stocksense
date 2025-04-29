@@ -2,9 +2,8 @@
 
 import { StockAnalysis } from '@/types/stock';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { format } from 'date-fns';
 
-interface StockCardProps extends StockAnalysis {}
+type StockCardProps = StockAnalysis;
 
 export default function StockCard({
   symbol,

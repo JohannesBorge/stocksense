@@ -28,7 +28,7 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
         changePercent: (Math.random() * 10 - 5).toFixed(2),
       };
       setStockData(mockData);
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to fetch stock data');
     }
   };
@@ -66,7 +66,7 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
       };
       onSave(analysis);
       onClose();
-    } catch (err) {
+    } catch {
       setErrorMessage('Failed to generate analysis');
     } finally {
       setIsLoading(false);
