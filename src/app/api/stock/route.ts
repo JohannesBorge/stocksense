@@ -11,11 +11,65 @@ interface TimeSeriesData {
   '5. volume': string;
 }
 
+type TimeRange = '1d' | '1w' | '1m' | '3m' | '6m' | 'ytd' | '1y' | '3y' | '5y' | '10y' | 'max';
+
+function getTimeSeriesFunction(range: TimeRange): string {
+  switch (range) {
+    case '1d':
+      return 'TIME_SERIES_INTRADAY&interval=5min';
+    case '1w':
+      return 'TIME_SERIES_INTRADAY&interval=15min';
+    case '1m':
+    case '3m':
+    case '6m':
+      return 'TIME_SERIES_DAILY';
+    case 'ytd':
+    case '1y':
+    case '3y':
+    case '5y':
+    case '10y':
+    case 'max':
+      return 'TIME_SERIES_DAILY_ADJUSTED';
+    default:
+      return 'TIME_SERIES_DAILY';
+  }
+}
+
+function getDataLimit(range: TimeRange): number {
+  switch (range) {
+    case '1d':
+      return 78; // 13 hours * 6 (5min intervals)
+    case '1w':
+      return 40; // 5 days * 8 (15min intervals)
+    case '1m':
+      return 30;
+    case '3m':
+      return 90;
+    case '6m':
+      return 180;
+    case 'ytd':
+      return 365;
+    case '1y':
+      return 365;
+    case '3y':
+      return 1095;
+    case '5y':
+      return 1825;
+    case '10y':
+      return 3650;
+    case 'max':
+      return 3650; // Maximum available data
+    default:
+      return 30;
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol');
     const type = searchParams.get('type');
+    const range = (searchParams.get('range') || '1m') as TimeRange;
 
     if (!symbol) {
       return NextResponse.json(
@@ -25,8 +79,9 @@ export async function GET(request: Request) {
     }
 
     if (type === 'historical') {
+      const timeSeriesFunction = getTimeSeriesFunction(range);
       const response = await fetch(
-        `${BASE_URL}?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
+        `${BASE_URL}?function=${timeSeriesFunction}&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
       );
 
       if (!response.ok) {
@@ -34,7 +89,13 @@ export async function GET(request: Request) {
       }
 
       const data = await response.json();
-      const timeSeriesData = data['Time Series (Daily)'] as Record<string, TimeSeriesData>;
+      const timeSeriesKey = timeSeriesFunction.includes('INTRADAY')
+        ? `Time Series (5min)`
+        : timeSeriesFunction.includes('ADJUSTED')
+        ? 'Time Series (Daily)'
+        : 'Time Series (Daily)';
+      
+      const timeSeriesData = data[timeSeriesKey] as Record<string, TimeSeriesData>;
 
       if (!timeSeriesData) {
         return NextResponse.json(
@@ -43,9 +104,9 @@ export async function GET(request: Request) {
         );
       }
 
-      // Get the last 30 days of data
+      const dataLimit = getDataLimit(range);
       const historicalData = Object.entries(timeSeriesData)
-        .slice(0, 30)
+        .slice(0, dataLimit)
         .map(([date, values]) => ({
           date,
           price: parseFloat(values['4. close']),
