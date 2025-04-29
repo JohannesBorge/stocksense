@@ -12,6 +12,11 @@ interface TimeSeriesData {
   '5. volume': string;
 }
 
+interface HistoricalDataPoint {
+  date: string;
+  price: number;
+}
+
 type TimeRange = '1d' | '1w' | '1m' | '3m' | '6m' | 'ytd' | '1y' | '3y' | '5y' | '10y' | 'max';
 
 function getTimeSeriesFunction(range: TimeRange): string {
@@ -105,7 +110,7 @@ export async function GET(request: Request) {
     if (type === 'historical') {
       // Check cache first
       const cacheKey = `historical_${symbol}_${range}`;
-      const cachedData = cache.get(cacheKey);
+      const cachedData = cache.get<HistoricalDataPoint[]>(cacheKey);
       if (cachedData) {
         return NextResponse.json(cachedData);
       }
