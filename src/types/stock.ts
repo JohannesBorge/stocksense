@@ -5,6 +5,12 @@ export interface NewsItem {
   source: string;
 }
 
+export interface PDFFile {
+  name: string;
+  url: string;
+  uploadedAt: string;
+}
+
 export interface StockData {
   symbol: string;
   price: number;
@@ -23,4 +29,5 @@ export interface StockAnalysis {
   news: NewsItem[];
   sentiment: 'positive' | 'neutral' | 'negative';
   aiInsight: string;
+  pdfFiles?: PDFFile[];
 } 

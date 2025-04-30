@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { StockAnalysis } from '@/types/stock';
-import { ArrowUpIcon, ArrowDownIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { useState, useRef } from 'react';
+import { StockAnalysis, PDFFile } from '@/types/stock';
+import { ArrowUpIcon, ArrowDownIcon, PencilIcon, TrashIcon, DocumentIcon } from '@heroicons/react/24/solid';
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -11,6 +11,7 @@ import { formatCurrency, formatNumber } from '@/utils/format';
 import { createPortal } from 'react-dom';
 
 type StockCardProps = StockAnalysis & {
+  pdfFiles?: PDFFile[];
   onUpdate?: (updatedAnalysis: StockAnalysis) => void;
   onDelete?: (symbol: string) => void;
 };
@@ -25,12 +26,16 @@ export default function StockCard({
   sentiment,
   aiInsight,
   date,
+  pdfFiles = [],
   onUpdate,
   onDelete,
 }: StockCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedPDF, setSelectedPDF] = useState<PDFFile | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editedAnalysis, setEditedAnalysis] = useState<StockAnalysis>({
     symbol,
     companyName,
@@ -41,6 +46,7 @@ export default function StockCard({
     sentiment,
     aiInsight,
     date,
+    pdfFiles,
   });
 
   const isPositive = change >= 0;
@@ -69,6 +75,60 @@ export default function StockCard({
         setIsDeleting(false);
       }
     }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !file.type.includes('pdf')) {
+      alert('Please select a PDF file');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('symbol', symbol);
+
+      // Upload the file
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      const { url } = await response.json();
+
+      // Add the new PDF file to the analysis
+      const newPDFFile: PDFFile = {
+        name: file.name,
+        url,
+        uploadedAt: new Date().toISOString(),
+      };
+
+      const updatedAnalysis = {
+        ...editedAnalysis,
+        pdfFiles: [...(editedAnalysis.pdfFiles || []), newPDFFile],
+      };
+
+      setEditedAnalysis(updatedAnalysis);
+      if (onUpdate) {
+        onUpdate(updatedAnalysis);
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Failed to upload file. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handlePDFClick = (pdf: PDFFile) => {
+    setSelectedPDF(pdf);
   };
 
   if (isDeleting) {
@@ -150,6 +210,40 @@ export default function StockCard({
                             </div>
                           ))}
                         </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300">PDF Files</label>
+                          <div className="mt-2 space-y-2">
+                            {editedAnalysis.pdfFiles?.map((pdf, index) => (
+                              <div key={index} className="flex items-center justify-between">
+                                <span className="text-sm text-gray-400">{pdf.name}</span>
+                                <button
+                                  onClick={() => {
+                                    const newPDFFiles = [...(editedAnalysis.pdfFiles || [])];
+                                    newPDFFiles.splice(index, 1);
+                                    setEditedAnalysis({ ...editedAnalysis, pdfFiles: newPDFFiles });
+                                  }}
+                                  className="text-red-400 hover:text-red-300"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                            <input
+                              type="file"
+                              ref={fileInputRef}
+                              onChange={handleFileUpload}
+                              accept=".pdf"
+                              className="hidden"
+                            />
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isUploading}
+                              className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                              {isUploading ? 'Uploading...' : 'Upload PDF'}
+                            </button>
+                          </div>
+                        </div>
                       </>
                     ) : (
                       <>
@@ -166,6 +260,21 @@ export default function StockCard({
                               </li>
                             ))}
                           </ul>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-white">PDF Files</h4>
+                          <div className="mt-2 space-y-2">
+                            {pdfFiles.map((pdf, index) => (
+                              <button
+                                key={index}
+                                onClick={() => handlePDFClick(pdf)}
+                                className="flex items-center text-sm text-indigo-400 hover:text-indigo-300"
+                              >
+                                <DocumentIcon className="h-4 w-4 mr-2" />
+                                {pdf.name}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </>
                     )}
@@ -219,6 +328,32 @@ export default function StockCard({
     );
   };
 
+  const renderPDFViewer = () => {
+    if (!selectedPDF) return null;
+
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="bg-gray-800 rounded-lg p-4 w-full max-w-4xl h-[80vh] flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium text-white">{selectedPDF.name}</h3>
+            <button
+              onClick={() => setSelectedPDF(null)}
+              className="text-gray-400 hover:text-white"
+            >
+              Close
+            </button>
+          </div>
+          <iframe
+            src={selectedPDF.url}
+            className="flex-1 w-full rounded-lg bg-white"
+            title={selectedPDF.name}
+          />
+        </div>
+      </div>,
+      document.body
+    );
+  };
+
   return (
     <>
       <div className="bg-gray-900 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-800 relative">
@@ -258,6 +393,15 @@ export default function StockCard({
 
           <div className="mt-4 text-xs text-gray-500">
             Last updated: {formatDate(date)}
+          </div>
+
+          <div className="mt-4">
+            {pdfFiles.length > 0 && (
+              <div className="flex items-center text-sm text-gray-400">
+                <DocumentIcon className="h-4 w-4 mr-1" />
+                {pdfFiles.length} PDF{pdfFiles.length !== 1 ? 's' : ''}
+              </div>
+            )}
           </div>
         </div>
 
@@ -303,6 +447,7 @@ export default function StockCard({
         </div>
       </div>
       {renderModal()}
+      {renderPDFViewer()}
     </>
   );
 } 
