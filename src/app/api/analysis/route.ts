@@ -9,6 +9,16 @@ interface CompanyOverview {
   industry: string;
 }
 
+interface AnalysisResponse {
+  sentiment: 'positive' | 'neutral' | 'negative';
+  aiInsight: string;
+  news: Array<{
+    title: string;
+    source: string;
+    date: string;
+  }>;
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -20,6 +30,10 @@ export async function POST(request: Request) {
       stockData: StockData;
       companyOverview: CompanyOverview;
     } = await request.json();
+
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OpenAI API key is not configured');
+    }
 
     console.log('Received request for symbol:', symbol);
     console.log('Stock data:', stockData);
@@ -60,7 +74,28 @@ Format the response as JSON with the following structure:
     });
 
     console.log('Received response from OpenAI');
-    const response = JSON.parse(completion.choices[0].message.content || '{}');
+    const content = completion.choices[0].message.content;
+    
+    if (!content) {
+      throw new Error('No content received from OpenAI');
+    }
+
+    let response: AnalysisResponse;
+    try {
+      response = JSON.parse(content);
+    } catch (error) {
+      throw new Error('Failed to parse OpenAI response as JSON');
+    }
+
+    // Validate response structure
+    if (!response.sentiment || !response.aiInsight || !Array.isArray(response.news)) {
+      throw new Error('Invalid response structure from OpenAI');
+    }
+
+    if (!['positive', 'neutral', 'negative'].includes(response.sentiment)) {
+      throw new Error('Invalid sentiment value from OpenAI');
+    }
+
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error generating analysis:', error);

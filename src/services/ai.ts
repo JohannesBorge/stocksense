@@ -13,18 +13,37 @@ export async function generateStockAnalysis(
   stockData: MarketstackStockData,
   companyInfo: CompanyInfo
 ): Promise<AnalysisResult> {
-  // For now, return mock data
-  // TODO: Implement actual AI analysis
-  return {
-    sentiment: 'neutral',
-    aiInsight: `Analysis for ${companyInfo.name} (${symbol}): The ${companyInfo.industry} company is currently trading at $${stockData.price.toFixed(2)} with a ${stockData.changePercent.toFixed(2)}% change.`,
-    news: [
-      {
-        title: 'Sample News Article',
-        url: 'https://example.com',
-        publishedAt: new Date().toISOString(),
-        source: 'Example News'
-      }
-    ]
-  };
+  try {
+    const response = await fetch('/api/analysis', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        symbol,
+        stockData,
+        companyOverview: {
+          name: companyInfo.name,
+          description: companyInfo.description,
+          sector: companyInfo.sector,
+          industry: companyInfo.industry,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.details || 'Failed to generate analysis');
+    }
+
+    const data = await response.json();
+    return {
+      sentiment: data.sentiment,
+      aiInsight: data.aiInsight,
+      news: data.news,
+    };
+  } catch (error) {
+    console.error('Error generating analysis:', error);
+    throw error;
+  }
 } 
