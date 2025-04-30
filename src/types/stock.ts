@@ -1,7 +1,8 @@
 export interface NewsItem {
   title: string;
+  url: string;
+  publishedAt: string;
   source: string;
-  date: string;
 }
 
 export interface StockData {
@@ -15,10 +16,10 @@ export interface StockAnalysis {
   symbol: string;
   companyName: string;
   price: number;
-  change: string;
-  changePercent: string;
+  change: number;
+  changePercent: number;
+  date: string;
   news: NewsItem[];
   sentiment: 'positive' | 'neutral' | 'negative';
   aiInsight: string;
-  date: string;
 } 

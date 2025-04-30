@@ -9,7 +9,7 @@ import AnalysisModal from '@/components/AnalysisModal';
 import ChatBox from '@/components/ChatBox';
 import { StockAnalysis } from '@/types/stock';
 import { getUserAnalyses, updateAnalysis, deleteAnalysis } from '@/services/firebase';
-import { fetchStockData } from '@/services/polygon';
+import { priceCache } from '@/services/priceCache';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -35,6 +35,10 @@ export default function Dashboard() {
           setError(null);
           const analyses = await getUserAnalyses(user.uid);
           setStocks(analyses);
+          
+          // Start price updates for all stocks
+          const symbols = analyses.map(stock => stock.symbol);
+          priceCache.startUpdates(symbols);
         } catch (err) {
           console.error('Error loading analyses:', err);
           setError('Failed to load stock analyses. Please try again later.');
@@ -45,9 +49,14 @@ export default function Dashboard() {
     };
 
     loadAnalyses();
+
+    // Cleanup price updates when component unmounts
+    return () => {
+      priceCache.stopUpdates();
+    };
   }, [user]);
 
-  // Add live price updates
+  // Update prices from cache
   useEffect(() => {
     if (!stocks.length) return;
 
@@ -55,42 +64,28 @@ export default function Dashboard() {
       try {
         const updatedStocks = await Promise.all(
           stocks.map(async (stock) => {
-            try {
-              const latestData = await fetchStockData(stock.symbol);
+            const cachedData = await priceCache.getPrice(stock.symbol);
+            if (cachedData) {
               return {
                 ...stock,
-                price: latestData.price,
-                change: latestData.change,
-                changePercent: latestData.changePercent,
-                date: new Date().toISOString().split('T')[0],
+                price: cachedData.price,
+                change: cachedData.change,
+                changePercent: cachedData.changePercent,
+                date: cachedData.lastUpdated.toISOString().split('T')[0],
               };
-            } catch (error) {
-              console.error(`Error updating price for ${stock.symbol}:`, error);
-              // If we hit rate limits, keep the old price
-              if (error instanceof Error && error.message.includes('rate limit')) {
-                setError('Rate limit reached. Prices will update when available.');
-                return stock;
-              }
-              return stock;
             }
+            return stock;
           })
         );
 
         setStocks(updatedStocks);
       } catch (error) {
-        console.error('Error updating prices:', error);
-        if (error instanceof Error && error.message.includes('rate limit')) {
-          setError('Rate limit reached. Prices will update when available.');
-        }
+        console.error('Error updating prices from cache:', error);
       }
     };
 
-    // Update prices immediately
-    updatePrices();
-
-    // Then update every 1 second
-    const interval = setInterval(updatePrices, 1000);
-
+    // Update prices every 15 seconds from cache
+    const interval = setInterval(updatePrices, 15000);
     return () => clearInterval(interval);
   }, [stocks]);
 
