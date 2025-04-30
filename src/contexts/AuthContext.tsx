@@ -7,6 +7,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  sendEmailVerification,
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
@@ -42,21 +43,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      if (!userCredential.user.emailVerified) {
+        await signOut(auth);
+        throw new Error('Please verify your email before signing in.');
+      }
     } catch (error) {
-      console.error('Error signing in:', error);
-      throw error;
+      if (error instanceof Error && error.message.includes('verify your email')) {
+        throw error;
+      }
+      throw new Error('Failed to sign in.');
     }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(userCredential.user);
+      throw new Error('Please check your email to verify your account before signing in.');
     } catch (error) {
-      console.error('Error signing up:', error);
-      throw error;
+      if (error instanceof Error && error.message.includes('verify your account')) {
+        throw error;
+      }
+      throw new Error('Failed to create an account.');
     }
   };
 

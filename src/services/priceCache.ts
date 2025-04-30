@@ -30,7 +30,7 @@ class PriceCache {
     return cachedData;
   }
 
-  private async updatePrices(symbols: string[]) {
+  private async updatePrices() {
     if (this.isUpdating) return;
     this.isUpdating = true;
 
@@ -52,25 +52,34 @@ class PriceCache {
         return;
       }
 
-      // Update prices for all symbols in batches of 10
-      const batchSize = 10;
-      for (let i = 0; i < symbols.length; i += batchSize) {
-        const batch = symbols.slice(i, i + batchSize);
-        try {
-          const batchData = await fetchBatchStockData(batch);
-          
-          batchData.forEach((data) => {
-            this.cache.set(data.symbol, {
-              price: data.price,
-              change: data.change,
-              changePercent: data.changePercent,
-              lastUpdated: new Date(data.lastUpdated)
-            });
+      const symbols = Array.from(this.cache.keys());
+      console.log(`Updating prices for ${symbols.length} symbols`);
+
+      // Increase batch size to reduce number of API calls
+      const BATCH_SIZE = 50; // Increased from 10 to 50
+
+      // Process symbols in larger batches
+      for (let i = 0; i < symbols.length; i += BATCH_SIZE) {
+        const batch = symbols.slice(i, i + BATCH_SIZE);
+        console.log(`Processing batch ${i / BATCH_SIZE + 1} of ${Math.ceil(symbols.length / BATCH_SIZE)}`);
+        
+        const batchData = await fetchBatchStockData(batch);
+        
+        // Update cache with new data
+        for (const data of batchData) {
+          this.cache.set(data.symbol, {
+            ...data,
+            lastUpdated: new Date()
           });
-        } catch (error) {
-          console.error(`Error updating batch prices:`, error);
+        }
+        
+        // Add a small delay between batches to avoid rate limiting
+        if (i + BATCH_SIZE < symbols.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
+
+      console.log('Price update completed');
     } catch (error) {
       console.error('Error updating prices:', error);
     } finally {
@@ -85,11 +94,11 @@ class PriceCache {
     }
 
     // Update prices immediately
-    this.updatePrices(symbols);
+    this.updatePrices();
 
     // Then update every 30 minutes
     this.updateInterval = setInterval(() => {
-      this.updatePrices(symbols);
+      this.updatePrices();
     }, 30 * 60 * 1000);
   }
 

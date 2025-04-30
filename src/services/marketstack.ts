@@ -23,58 +23,38 @@ export async function fetchStockData(symbol: string): Promise<MarketstackStockDa
   }
 
   try {
-    console.log('Fetching current price for symbol:', symbol);
-    // Get current price
-    const currentResponse = await fetch(
-      `${BASE_URL}/intraday/latest?access_key=${MARKETSTACK_API_KEY}&symbols=${symbol}`
-    );
-
-    if (!currentResponse.ok) {
-      const errorText = await currentResponse.text();
-      console.error('Marketstack API error:', {
-        status: currentResponse.status,
-        statusText: currentResponse.statusText,
-        error: errorText
-      });
-      throw new Error(`Failed to fetch stock data: ${currentResponse.statusText}`);
-    }
-
-    const currentData = await currentResponse.json() as MarketstackResponse;
-
-    if (!currentData.data || currentData.data.length === 0) {
-      throw new Error(`No data available for symbol: ${symbol}`);
-    }
-
-    const currentPrice = currentData.data[0].close;
-    console.log('Current price:', currentPrice);
-
-    // Get price from 24 hours ago
+    console.log('Fetching data for symbol:', symbol);
+    
+    // Get data for the last 24 hours in a single call
     const twentyFourHoursAgo = new Date();
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
     
-    console.log('Fetching price from 24 hours ago for symbol:', symbol);
-    const historicalResponse = await fetch(
+    const response = await fetch(
       `${BASE_URL}/intraday?access_key=${MARKETSTACK_API_KEY}&symbols=${symbol}&date_from=${twentyFourHoursAgo.toISOString().split('T')[0]}`
     );
 
-    if (!historicalResponse.ok) {
-      const errorText = await historicalResponse.text();
+    if (!response.ok) {
+      const errorText = await response.text();
       console.error('Marketstack API error:', {
-        status: historicalResponse.status,
-        statusText: historicalResponse.statusText,
+        status: response.status,
+        statusText: response.statusText,
         error: errorText
       });
-      throw new Error(`Failed to fetch historical data: ${historicalResponse.statusText}`);
+      throw new Error(`Failed to fetch stock data: ${response.statusText}`);
     }
 
-    const historicalData = await historicalResponse.json() as MarketstackResponse;
-    
-    // Find the oldest price from the last 24 hours
-    const historicalPrices = historicalData.data || [];
-    const oldestPrice = historicalPrices.length > 0 ? historicalPrices[historicalPrices.length - 1].close : currentPrice;
-    
-    console.log('Historical price:', oldestPrice);
+    const data = await response.json() as MarketstackResponse;
 
+    if (!data.data || data.data.length === 0) {
+      throw new Error(`No data available for symbol: ${symbol}`);
+    }
+
+    // Get current price (latest data point)
+    const currentPrice = data.data[0].close;
+    
+    // Get price from 24 hours ago (oldest data point)
+    const oldestPrice = data.data[data.data.length - 1].close;
+    
     // Calculate change and change percent
     const change = currentPrice - oldestPrice;
     const changePercent = (change / oldestPrice) * 100;
