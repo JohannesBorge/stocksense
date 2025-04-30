@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
@@ -39,7 +38,7 @@ export default function IPOsPage() {
   const [selectedSector, setSelectedSector] = useState<string>('');
   const [days, setDays] = useState('30');
 
-  const fetchIPOs = async () => {
+  const fetchIPOs = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -54,11 +53,11 @@ export default function IPOsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSector, days]);
 
   useEffect(() => {
     fetchIPOs();
-  }, [selectedSector, days]);
+  }, [fetchIPOs]);
 
   return (
     <Layout>
