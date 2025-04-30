@@ -1,4 +1,4 @@
-import { fetchStockData } from './polygon';
+import { fetchBatchStockData } from './marketstack';
 
 interface PriceData {
   price: number;
@@ -57,17 +57,14 @@ class PriceCache {
       for (let i = 0; i < symbols.length; i += batchSize) {
         const batch = symbols.slice(i, i + batchSize);
         try {
-          const batchData = await Promise.all(
-            batch.map(symbol => fetchStockData(symbol))
-          );
+          const batchData = await fetchBatchStockData(batch);
           
-          batchData.forEach((data, index) => {
-            const symbol = batch[index];
-            this.cache.set(symbol, {
-              price: Number(data.price),
-              change: Number(data.change),
-              changePercent: Number(data.changePercent),
-              lastUpdated: new Date()
+          batchData.forEach((data) => {
+            this.cache.set(data.symbol, {
+              price: data.price,
+              change: data.change,
+              changePercent: data.changePercent,
+              lastUpdated: new Date(data.lastUpdated)
             });
           });
         } catch (error) {
