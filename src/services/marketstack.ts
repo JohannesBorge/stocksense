@@ -1,5 +1,5 @@
 const MARKETSTACK_API_KEY = process.env.NEXT_PUBLIC_MARKETSTACK_API_KEY;
-const BASE_URL = 'http://api.marketstack.com/v1';
+const BASE_URL = 'https://api.marketstack.com/v1';
 
 interface MarketstackResponse {
   data: Array<{
@@ -23,12 +23,19 @@ export async function fetchStockData(symbol: string): Promise<MarketstackStockDa
   }
 
   try {
+    console.log('Fetching current price for symbol:', symbol);
     // Get current price
     const currentResponse = await fetch(
       `${BASE_URL}/intraday/latest?access_key=${MARKETSTACK_API_KEY}&symbols=${symbol}`
     );
 
     if (!currentResponse.ok) {
+      const errorText = await currentResponse.text();
+      console.error('Marketstack API error:', {
+        status: currentResponse.status,
+        statusText: currentResponse.statusText,
+        error: errorText
+      });
       throw new Error(`Failed to fetch stock data: ${currentResponse.statusText}`);
     }
 
@@ -39,18 +46,27 @@ export async function fetchStockData(symbol: string): Promise<MarketstackStockDa
     }
 
     const currentPrice = currentData.data[0].close;
+    console.log('Current price:', currentPrice);
 
     // Get previous day's price for change calculation
+    console.log('Fetching previous day price for symbol:', symbol);
     const previousResponse = await fetch(
       `${BASE_URL}/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=${symbol}`
     );
 
     if (!previousResponse.ok) {
+      const errorText = await previousResponse.text();
+      console.error('Marketstack API error:', {
+        status: previousResponse.status,
+        statusText: previousResponse.statusText,
+        error: errorText
+      });
       throw new Error(`Failed to fetch previous day data: ${previousResponse.statusText}`);
     }
 
     const previousData = await previousResponse.json() as MarketstackResponse;
     const previousPrice = previousData.data[0].close;
+    console.log('Previous price:', previousPrice);
 
     // Calculate change and change percent
     const change = currentPrice - previousPrice;
@@ -65,6 +81,9 @@ export async function fetchStockData(symbol: string): Promise<MarketstackStockDa
     };
   } catch (error) {
     console.error('Error fetching stock data:', error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch stock data: ${error.message}`);
+    }
     throw error;
   }
 }

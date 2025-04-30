@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { StockAnalysis } from '@/types/stock';
 import { fetchStockData } from '@/services/marketstack';
 import { getCompanyInfo } from '@/services/company';
-import { generateStockAnalysis } from '@/services/ai';
+import { generateStockAnalysis } from '@/services/openai';
 import { saveAnalysis } from '@/services/firebase';
 
 interface AnalysisModalProps {
@@ -38,18 +38,24 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
     setErrorMessage('');
 
     try {
+      console.log('Starting analysis generation for symbol:', stockSymbol);
+      
       // Fetch latest stock data and company overview
+      console.log('Fetching stock data and company info...');
       const [latestStockData, companyOverview] = await Promise.all([
         fetchStockData(stockSymbol),
         getCompanyInfo(stockSymbol),
       ]);
+      console.log('Stock data and company info fetched successfully');
 
       // Generate AI analysis
+      console.log('Generating AI analysis...');
       const { sentiment, aiInsight, news } = await generateStockAnalysis(
         stockSymbol,
         latestStockData,
         companyOverview
       );
+      console.log('AI analysis generated successfully');
 
       // Create the analysis object
       const analysis: StockAnalysis = {
@@ -58,21 +64,42 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
         price: latestStockData.price,
         change: latestStockData.change,
         changePercent: latestStockData.changePercent,
-        news,
+        news: news.map(item => ({
+          title: item.title,
+          url: `https://www.google.com/search?q=${encodeURIComponent(item.title)}`,
+          publishedAt: item.date,
+          source: item.source
+        })),
         sentiment,
         aiInsight,
         date: new Date().toISOString().split('T')[0],
       };
 
       // Save to Firebase
+      console.log('Saving analysis to Firebase...');
       await saveAnalysis(user.uid, analysis);
+      console.log('Analysis saved successfully');
 
       // Update UI
       onSave(analysis);
       onClose();
     } catch (error) {
-      console.error('Error generating analysis:', error);
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to generate analysis');
+      console.error('Error in analysis generation:', error);
+      let errorMessage = 'Failed to generate analysis';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Marketstack API')) {
+          errorMessage = 'Failed to fetch stock data. Please check if the symbol is correct and try again.';
+        } else if (error.message.includes('OpenAI')) {
+          errorMessage = 'Failed to generate AI analysis. Please try again in a few moments.';
+        } else if (error.message.includes('Firebase')) {
+          errorMessage = 'Failed to save analysis. Please try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setErrorMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }

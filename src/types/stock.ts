@@ -8,8 +8,9 @@ export interface NewsItem {
 export interface StockData {
   symbol: string;
   price: number;
-  change: string;
-  changePercent: string;
+  change: number;
+  changePercent: number;
+  lastUpdated?: string;
 }
 
 export interface StockAnalysis {
