@@ -6,8 +6,8 @@ import { ArrowUpIcon, ArrowDownIcon, PencilIcon, TrashIcon } from '@heroicons/re
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { Fragment } from 'react';
-import StockPriceChart from './StockPriceChart';
 import { formatDate } from '@/utils/date';
+import { formatCurrency, formatNumber } from '@/utils/format';
 
 type StockCardProps = StockAnalysis & {
   onUpdate?: (updatedAnalysis: StockAnalysis) => void;
@@ -87,7 +87,7 @@ export default function StockCard({
               <p className="text-sm text-gray-400">{companyName}</p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-semibold text-white">${price.toFixed(2)}</p>
+              <p className="text-lg font-semibold text-white">${formatCurrency(price)}</p>
               <div className="flex items-center justify-end">
                 {isPositive ? (
                   <ArrowUpIcon className="h-4 w-4 text-green-400" />
@@ -99,7 +99,7 @@ export default function StockCard({
                     isPositive ? 'text-green-400' : 'text-red-400'
                   }`}
                 >
-                  {change >= 0 ? '+' : ''}{change.toFixed(2)} ({changePercent.toFixed(2)}%)
+                  {formatCurrency(change)} ({formatNumber(changePercent)}%)
                 </span>
               </div>
             </div>
@@ -235,12 +235,6 @@ export default function StockCard({
                         <div>
                           <h4 className="text-sm font-medium text-white">AI Insight</h4>
                           <p className="mt-1 text-sm text-gray-400">{aiInsight}</p>
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-medium text-white">Price History</h4>
-                          <div className="mt-2">
-                            <StockPriceChart symbol={symbol} />
-                          </div>
                         </div>
                         <div>
                           <h4 className="text-sm font-medium text-white">Latest News</h4>
