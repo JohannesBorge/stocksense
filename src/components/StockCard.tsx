@@ -159,7 +159,7 @@ export default function StockCard({
       </div>
 
       <Transition appear show={isExpanded} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={() => setIsExpanded(false)}>
+        <Dialog as="div" className="relative z-50" onClose={() => setIsExpanded(false)}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
