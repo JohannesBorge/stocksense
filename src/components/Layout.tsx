@@ -10,7 +10,6 @@ import { useRouter, usePathname } from 'next/navigation';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Analysis', href: '/analysis' },
-  { name: 'IPOs', href: '/ipos' },
   { name: 'Pricing', href: '/pricing' },
 ];
 

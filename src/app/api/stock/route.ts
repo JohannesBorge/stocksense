@@ -97,11 +97,11 @@ export async function GET(request: Request) {
 
     if (data.error) {
       console.error('Marketstack API returned error:', data.error);
-      return NextResponse.json(
+        return NextResponse.json(
         { error: `Marketstack API error: ${data.error.message}` },
-        { status: 400 }
-      );
-    }
+          { status: 400 }
+        );
+      }
 
     if (!data.data || data.data.length === 0) {
       return NextResponse.json(
@@ -111,8 +111,8 @@ export async function GET(request: Request) {
     }
 
     const latestData = data.data[0];
-    return NextResponse.json({
-      symbol,
+      return NextResponse.json({
+        symbol,
       price: latestData.close,
       change: 0, // Marketstack doesn't provide change directly
       changePercent: 0, // Marketstack doesn't provide change percent directly

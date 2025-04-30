@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error) {
       if (error instanceof Error && error.message.includes('verify your email')) {
-        throw error;
+      throw error;
       }
       throw new Error('Failed to sign in.');
     }
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       throw new Error('Please check your email to verify your account before signing in.');
     } catch (error) {
       if (error instanceof Error && error.message.includes('verify your account')) {
-        throw error;
+      throw error;
       }
       throw new Error('Failed to create an account.');
     }

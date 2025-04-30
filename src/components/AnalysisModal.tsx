@@ -112,34 +112,34 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
         <h2 className="text-xl font-semibold text-white mb-4">New Stock Analysis</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+                      <div>
             <label htmlFor="symbol" className="block text-sm font-medium text-gray-300">
-              Stock Symbol
-            </label>
-            <input
-              type="text"
+                          Stock Symbol
+                        </label>
+                          <input
+                            type="text"
               id="symbol"
-              value={stockSymbol}
-              onChange={(e) => setStockSymbol(e.target.value.toUpperCase())}
+                            value={stockSymbol}
+                            onChange={(e) => setStockSymbol(e.target.value.toUpperCase())}
               className="mt-1 block w-full rounded-md border-0 bg-gray-700 px-3 py-2 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
-              placeholder="e.g., AAPL"
+                            placeholder="e.g., AAPL"
               disabled={isLoading}
-            />
-          </div>
+                          />
+                        </div>
 
-          {errorMessage && (
+                      {errorMessage && (
             <div className="text-red-400 text-sm">{errorMessage}</div>
-          )}
+                      )}
 
           <div className="flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
+                  <button
+                    type="button"
+                    onClick={onClose}
               className="px-4 py-2 text-sm font-semibold text-gray-300 hover:text-white"
               disabled={isLoading}
-            >
-              Cancel
-            </button>
+                  >
+                    Cancel
+                  </button>
             <button
               type="submit"
               className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
@@ -149,7 +149,7 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
             </button>
           </div>
         </form>
-      </div>
+        </div>
     </div>,
     document.body
   );

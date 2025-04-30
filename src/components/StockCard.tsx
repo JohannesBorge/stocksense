@@ -442,7 +442,7 @@ export default function StockCard({
                   </Menu.Item>
                 </div>
               </Menu.Items>
-            </Transition>
+      </Transition>
           </Menu>
         </div>
       </div>

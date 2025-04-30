@@ -74,7 +74,7 @@ export default function Dashboard() {
                 date: cachedData.lastUpdated.toISOString().split('T')[0],
               };
             }
-            return stock;
+              return stock;
           })
         );
 
@@ -262,4 +262,4 @@ export default function Dashboard() {
       </div>
     </Layout>
   );
-}
+} 
