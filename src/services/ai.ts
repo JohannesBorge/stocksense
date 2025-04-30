@@ -1,12 +1,6 @@
 import { MarketstackStockData } from './marketstack';
 import { NewsItem } from '@/types/stock';
-
-interface CompanyInfo {
-  name: string;
-  description: string;
-  sector: string;
-  industry: string;
-}
+import { CompanyInfo } from './company';
 
 interface AnalysisResult {
   sentiment: 'positive' | 'neutral' | 'negative';
