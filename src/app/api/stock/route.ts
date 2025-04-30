@@ -1,16 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cache } from '@/services/cache';
 
-const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
-const BASE_URL = 'https://www.alphavantage.co/query';
-
-interface TimeSeriesData {
-  '1. open': string;
-  '2. high': string;
-  '3. low': string;
-  '4. close': string;
-  '5. volume': string;
-}
+const POLYGON_API_KEY = process.env.NEXT_PUBLIC_POLYGON_API_KEY;
+const BASE_URL = 'https://api.polygon.io';
 
 interface HistoricalDataPoint {
   date: string;
@@ -19,25 +11,44 @@ interface HistoricalDataPoint {
 
 type TimeRange = '1d' | '1w' | '1m' | '3m' | '6m' | 'ytd' | '1y' | '3y' | '5y' | '10y' | 'max';
 
-function getTimeSeriesFunction(range: TimeRange): string {
+function getMultiplier(range: TimeRange): number {
   switch (range) {
     case '1d':
-      return 'TIME_SERIES_INTRADAY&interval=5min';
+      return 5; // 5 minutes
     case '1w':
-      return 'TIME_SERIES_INTRADAY&interval=15min';
+      return 15; // 15 minutes
     case '1m':
     case '3m':
     case '6m':
-      return 'TIME_SERIES_DAILY';
     case 'ytd':
     case '1y':
     case '3y':
     case '5y':
     case '10y':
     case 'max':
-      return 'TIME_SERIES_DAILY_ADJUSTED';
+      return 1; // 1 day
     default:
-      return 'TIME_SERIES_DAILY';
+      return 1;
+  }
+}
+
+function getTimespan(range: TimeRange): string {
+  switch (range) {
+    case '1d':
+    case '1w':
+      return 'minute';
+    case '1m':
+    case '3m':
+    case '6m':
+    case 'ytd':
+    case '1y':
+    case '3y':
+    case '5y':
+    case '10y':
+    case 'max':
+      return 'day';
+    default:
+      return 'day';
   }
 }
 
@@ -115,9 +126,52 @@ export async function GET(request: Request) {
         return NextResponse.json(cachedData);
       }
 
-      const timeSeriesFunction = getTimeSeriesFunction(range);
+      const multiplier = getMultiplier(range);
+      const timespan = getTimespan(range);
+      const limit = getDataLimit(range);
+
+      // Calculate the from/to dates
+      const to = new Date();
+      const from = new Date();
+      switch (range) {
+        case '1d':
+          from.setDate(from.getDate() - 1);
+          break;
+        case '1w':
+          from.setDate(from.getDate() - 7);
+          break;
+        case '1m':
+          from.setMonth(from.getMonth() - 1);
+          break;
+        case '3m':
+          from.setMonth(from.getMonth() - 3);
+          break;
+        case '6m':
+          from.setMonth(from.getMonth() - 6);
+          break;
+        case 'ytd':
+          from.setMonth(0);
+          from.setDate(1);
+          break;
+        case '1y':
+          from.setFullYear(from.getFullYear() - 1);
+          break;
+        case '3y':
+          from.setFullYear(from.getFullYear() - 3);
+          break;
+        case '5y':
+          from.setFullYear(from.getFullYear() - 5);
+          break;
+        case '10y':
+          from.setFullYear(from.getFullYear() - 10);
+          break;
+        case 'max':
+          from.setFullYear(from.getFullYear() - 20); // Polygon.io typically has 20 years of data
+          break;
+      }
+
       const response = await fetch(
-        `${BASE_URL}?function=${timeSeriesFunction}&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
+        `${BASE_URL}/v2/aggs/ticker/${symbol}/range/${multiplier}/${timespan}/${from.toISOString().split('T')[0]}/${to.toISOString().split('T')[0]}?limit=${limit}&apiKey=${POLYGON_API_KEY}`
       );
 
       if (!response.ok) {
@@ -126,45 +180,17 @@ export async function GET(request: Request) {
 
       const data = await response.json();
 
-      // Check for API rate limit
-      if (data.Note && data.Note.includes('API call frequency')) {
-        return NextResponse.json(
-          { error: 'API rate limit reached. Please try again in a minute.' },
-          { status: 429 }
-        );
-      }
-
-      // Check for invalid symbol
-      if (data.Error) {
-        return NextResponse.json(
-          { error: 'Invalid stock symbol' },
-          { status: 400 }
-        );
-      }
-
-      const timeSeriesKey = timeSeriesFunction.includes('INTRADAY')
-        ? `Time Series (5min)`
-        : timeSeriesFunction.includes('ADJUSTED')
-        ? 'Time Series (Daily)'
-        : 'Time Series (Daily)';
-      
-      const timeSeriesData = data[timeSeriesKey] as Record<string, TimeSeriesData>;
-
-      if (!timeSeriesData) {
+      if (!data.results || data.results.length === 0) {
         return NextResponse.json(
           { error: 'No data available for this time range' },
           { status: 404 }
         );
       }
 
-      const dataLimit = getDataLimit(range);
-      const historicalData = Object.entries(timeSeriesData)
-        .slice(0, dataLimit)
-        .map(([date, values]) => ({
-          date,
-          price: parseFloat(values['4. close']),
-        }))
-        .reverse();
+      const historicalData = data.results.map((result: any) => ({
+        date: new Date(result.t).toISOString().split('T')[0],
+        price: result.c, // Closing price
+      }));
 
       // Cache the data
       cache.set(cacheKey, historicalData, getCacheTTL(range));
@@ -172,46 +198,54 @@ export async function GET(request: Request) {
       return NextResponse.json(historicalData);
     }
 
-    const endpoint = type === 'overview' ? 'OVERVIEW' : 'GLOBAL_QUOTE';
-    const response = await fetch(
-      `${BASE_URL}?function=${endpoint}&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch stock data');
-    }
-
-    const data = await response.json();
-
-    // Check for API rate limit
-    if (data.Note && data.Note.includes('API call frequency')) {
-      return NextResponse.json(
-        { error: 'API rate limit reached. Please try again in a minute.' },
-        { status: 429 }
-      );
-    }
-
     if (type === 'overview') {
+      const response = await fetch(
+        `${BASE_URL}/v3/reference/tickers/${symbol}?apiKey=${POLYGON_API_KEY}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch company overview');
+      }
+
+      const data = await response.json();
+
       return NextResponse.json({
-        name: data.Name,
-        description: data.Description,
-        sector: data.Sector,
-        industry: data.Industry,
+        name: data.results.name,
+        description: data.results.description,
+        sector: data.results.sector,
+        industry: data.results.industry,
       });
     } else {
-      const quote = data['Global Quote'];
-      if (!quote) {
-        return NextResponse.json(
-          { error: 'Invalid stock symbol' },
-          { status: 400 }
-        );
+      const response = await fetch(
+        `${BASE_URL}/v2/last/trade/${symbol}?apiKey=${POLYGON_API_KEY}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch stock data');
       }
+
+      const data = await response.json();
+
+      // Get previous day's close for calculating change
+      const previousCloseResponse = await fetch(
+        `${BASE_URL}/v2/aggs/ticker/${symbol}/prev?apiKey=${POLYGON_API_KEY}`
+      );
+
+      if (!previousCloseResponse.ok) {
+        throw new Error('Failed to fetch previous close');
+      }
+
+      const previousData = await previousCloseResponse.json();
+      const previousClose = previousData.results[0].c;
+      const currentPrice = data.results.p;
+      const change = currentPrice - previousClose;
+      const changePercent = (change / previousClose) * 100;
 
       return NextResponse.json({
         symbol,
-        price: parseFloat(quote['05. price']),
-        change: quote['09. change'],
-        changePercent: quote['10. change percent'].replace('%', ''),
+        price: currentPrice,
+        change: change.toFixed(2),
+        changePercent: changePercent.toFixed(2),
       });
     }
   } catch (error) {

@@ -4,7 +4,7 @@ import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { StockData, StockAnalysis } from '@/types/stock';
-import { fetchStockData, fetchCompanyOverview } from '@/services/alphaVantage';
+import { fetchStockData, getCompanyInfo } from '@/services/polygon';
 import { generateStockAnalysis } from '@/services/openai';
 import { saveAnalysis } from '@/services/firebase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -52,7 +52,7 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
       // Fetch latest stock data and company overview
       const [latestStockData, companyOverview] = await Promise.all([
         fetchStockData(stockSymbol),
-        fetchCompanyOverview(stockSymbol),
+        getCompanyInfo(stockSymbol),
       ]);
 
       // Generate AI analysis
