@@ -12,6 +12,10 @@ interface MarketstackIPO {
   price: number;
 }
 
+interface MarketstackResponse {
+  data: MarketstackIPO[];
+}
+
 export async function fetchAndStoreIPOs() {
   if (!MARKETSTACK_API_KEY) {
     throw new Error('Marketstack API key is not configured');
@@ -27,7 +31,7 @@ export async function fetchAndStoreIPOs() {
       throw new Error(`Failed to fetch IPO data: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as MarketstackResponse;
     
     if (!data.data || data.data.length === 0) {
       throw new Error('No IPO data available');

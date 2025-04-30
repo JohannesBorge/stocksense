@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fetchAndStoreIPOs } from '@/services/ipos';
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     await fetchAndStoreIPOs();
     return NextResponse.json({ message: 'IPO data updated successfully' });
