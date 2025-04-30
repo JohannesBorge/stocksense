@@ -92,7 +92,22 @@ export async function GET(request: Request) {
     if (!MARKETSTACK_API_KEY) {
       console.error('Marketstack API key is not configured');
       return NextResponse.json(
-        { error: 'API configuration error' },
+        { 
+          error: 'API configuration error',
+          details: 'Marketstack API key is not configured. Please check your environment variables.'
+        },
+        { status: 500 }
+      );
+    }
+
+    // Validate API key format
+    if (!/^[a-zA-Z0-9]{32}$/.test(MARKETSTACK_API_KEY)) {
+      console.error('Invalid Marketstack API key format');
+      return NextResponse.json(
+        { 
+          error: 'API configuration error',
+          details: 'Invalid Marketstack API key format. Please check your API key.'
+        },
         { status: 500 }
       );
     }
@@ -173,8 +188,18 @@ export async function GET(request: Request) {
       // Marketstack requires symbols to be uppercase
       const formattedSymbol = symbol.toUpperCase();
 
+      // Build the URL with proper encoding
+      const params = new URLSearchParams({
+        access_key: MARKETSTACK_API_KEY,
+        symbols: formattedSymbol,
+        date_from: fromDate,
+        date_to: toDate,
+        interval: interval,
+        limit: '1000'
+      });
+
       const response = await fetch(
-        `${BASE_URL}/eod?access_key=${MARKETSTACK_API_KEY}&symbols=${formattedSymbol}&date_from=${fromDate}&date_to=${toDate}&interval=${interval}&limit=1000`
+        `${BASE_URL}/eod?${params.toString()}`
       );
 
       if (!response.ok) {
@@ -183,10 +208,11 @@ export async function GET(request: Request) {
           status: response.status,
           statusText: response.statusText,
           error: errorText,
-          url: response.url
+          url: response.url,
+          params: Object.fromEntries(params)
         });
         return NextResponse.json(
-          { error: `Failed to fetch historical data: ${response.statusText}` },
+          { error: `Failed to fetch historical data: ${response.statusText}`, details: errorText },
           { status: response.status }
         );
       }
