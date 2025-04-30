@@ -36,10 +36,20 @@ export default function IPOsPage() {
       
       const response = await fetch(`/api/stocks?${params.toString()}`);
       const data = await response.json();
+      
+      if (!data || !Array.isArray(data.stocks)) {
+        console.error('Invalid response format:', data);
+        setStocks([]);
+        setTotalStocks(0);
+        return;
+      }
+
       setStocks(data.stocks);
-      setTotalStocks(data.total);
+      setTotalStocks(data.total || 0);
     } catch (error) {
       console.error('Error fetching stocks:', error);
+      setStocks([]);
+      setTotalStocks(0);
     } finally {
       setLoading(false);
     }
