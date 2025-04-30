@@ -20,7 +20,6 @@ export default function Dashboard() {
   const [stocks, setStocks] = useState<StockAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingSymbols, setDeletingSymbols] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -115,21 +114,11 @@ export default function Dashboard() {
     if (!user) return;
 
     try {
-      // Add symbol to deleting set
-      setDeletingSymbols(prev => new Set(prev).add(symbol));
-      
       // Optimistically update the UI
       setStocks(prevStocks => prevStocks.filter(stock => stock.symbol !== symbol));
       
       // Then perform the actual deletion
       await deleteAnalysis(user.uid, symbol);
-      
-      // Remove symbol from deleting set
-      setDeletingSymbols(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(symbol);
-        return newSet;
-      });
     } catch (error) {
       console.error('Error deleting analysis:', error);
       setError('Failed to delete analysis. Please try again.');
@@ -141,13 +130,6 @@ export default function Dashboard() {
       } catch (revertError) {
         console.error('Error reverting state:', revertError);
       }
-      
-      // Remove symbol from deleting set
-      setDeletingSymbols(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(symbol);
-        return newSet;
-      });
     }
   };
 
