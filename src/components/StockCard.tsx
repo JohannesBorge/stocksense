@@ -7,6 +7,7 @@ import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { Fragment } from 'react';
 import StockPriceChart from './StockPriceChart';
+import { formatDate } from '@/utils/date';
 
 type StockCardProps = StockAnalysis & {
   onUpdate?: (updatedAnalysis: StockAnalysis) => void;
@@ -41,7 +42,7 @@ export default function StockCard({
     date,
   });
 
-  const isPositive = parseFloat(change) >= 0;
+  const isPositive = change >= 0;
   const sentimentColors = {
     positive: 'bg-green-500/10 text-green-400',
     neutral: 'bg-yellow-500/10 text-yellow-400',
@@ -56,11 +57,14 @@ export default function StockCard({
   };
 
   const handleDelete = async () => {
-    if (onDelete) {
+    if (window.confirm(`Are you sure you want to delete ${symbol}?`)) {
       setIsDeleting(true);
       try {
-        await onDelete(symbol);
-      } catch {
+        await onDelete?.(symbol);
+      } catch (error) {
+        console.error('Error deleting stock:', error);
+        alert('Failed to delete stock. Please try again.');
+      } finally {
         setIsDeleting(false);
       }
     }
@@ -95,7 +99,7 @@ export default function StockCard({
                     isPositive ? 'text-green-400' : 'text-red-400'
                   }`}
                 >
-                  {change} ({changePercent}%)
+                  {change >= 0 ? '+' : ''}{change.toFixed(2)} ({changePercent.toFixed(2)}%)
                 </span>
               </div>
             </div>
@@ -108,7 +112,7 @@ export default function StockCard({
           </div>
 
           <div className="mt-4 text-xs text-gray-500">
-            Last updated: {date}
+            Last updated: {formatDate(date)}
           </div>
         </div>
 
