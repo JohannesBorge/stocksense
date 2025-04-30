@@ -26,10 +26,13 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
     if (stockSymbol) {
       const fetchData = async () => {
         try {
+          setErrorMessage('');
           const data = await fetchStockData(stockSymbol);
           setStockData(data);
-        } catch {
-          setErrorMessage('Failed to fetch stock data');
+        } catch (error) {
+          console.error('Error fetching stock data:', error);
+          setErrorMessage(error instanceof Error ? error.message : 'Failed to fetch stock data');
+          setStockData(null);
         }
       };
 
@@ -42,6 +45,11 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
   const handleSubmit = async () => {
     if (!user) {
       setErrorMessage('You must be logged in to generate analysis');
+      return;
+    }
+
+    if (!stockSymbol) {
+      setErrorMessage('Please enter a stock symbol');
       return;
     }
 
