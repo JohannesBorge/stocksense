@@ -83,7 +83,8 @@ Format the response as JSON with the following structure:
     let response: AnalysisResponse;
     try {
       response = JSON.parse(content);
-    } catch (error) {
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', parseError);
       throw new Error('Failed to parse OpenAI response as JSON');
     }
 
