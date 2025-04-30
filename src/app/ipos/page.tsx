@@ -35,14 +35,14 @@ const sectors = [
 export default function IPOsPage() {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSector, setSelectedSector] = useState<string>('');
+  const [selectedSector, setSelectedSector] = useState<string>('all');
   const [days, setDays] = useState('30');
 
   const fetchIPOs = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (selectedSector) params.append('sector', selectedSector);
+      if (selectedSector && selectedSector !== 'all') params.append('sector', selectedSector);
       params.append('days', days);
       
       const response = await fetch(`/api/ipos?${params.toString()}`);
@@ -70,7 +70,7 @@ export default function IPOsPage() {
                 <SelectValue placeholder="Select Sector" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Sectors</SelectItem>
+                <SelectItem value="all">All Sectors</SelectItem>
                 {sectors.map((sector) => (
                   <SelectItem key={sector} value={sector}>
                     {sector}
