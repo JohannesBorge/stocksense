@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+// Marketstack API integration for stock data
 const MARKETSTACK_API_KEY = process.env.NEXT_PUBLIC_MARKETSTACK_API_KEY;
 const BASE_URL = 'https://api.marketstack.com/v2';
 
