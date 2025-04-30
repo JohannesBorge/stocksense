@@ -1,6 +1,14 @@
 const MARKETSTACK_API_KEY = process.env.NEXT_PUBLIC_MARKETSTACK_API_KEY;
 const BASE_URL = 'http://api.marketstack.com/v1';
 
+interface MarketstackResponse {
+  data: Array<{
+    symbol: string;
+    close: number;
+    date: string;
+  }>;
+}
+
 export interface MarketstackStockData {
   symbol: string;
   price: number;
@@ -24,7 +32,7 @@ export async function fetchStockData(symbol: string): Promise<MarketstackStockDa
       throw new Error(`Failed to fetch stock data: ${currentResponse.statusText}`);
     }
 
-    const currentData = await currentResponse.json();
+    const currentData = await currentResponse.json() as MarketstackResponse;
 
     if (!currentData.data || currentData.data.length === 0) {
       throw new Error(`No data available for symbol: ${symbol}`);
@@ -41,7 +49,7 @@ export async function fetchStockData(symbol: string): Promise<MarketstackStockDa
       throw new Error(`Failed to fetch previous day data: ${previousResponse.statusText}`);
     }
 
-    const previousData = await previousResponse.json();
+    const previousData = await previousResponse.json() as MarketstackResponse;
     const previousPrice = previousData.data[0].close;
 
     // Calculate change and change percent
@@ -76,7 +84,7 @@ export async function fetchBatchStockData(symbols: string[]): Promise<Marketstac
       throw new Error(`Failed to fetch batch stock data: ${currentResponse.statusText}`);
     }
 
-    const currentData = await currentResponse.json();
+    const currentData = await currentResponse.json() as MarketstackResponse;
 
     if (!currentData.data || currentData.data.length === 0) {
       throw new Error('No data available for the requested symbols');
@@ -91,11 +99,14 @@ export async function fetchBatchStockData(symbols: string[]): Promise<Marketstac
       throw new Error(`Failed to fetch previous day batch data: ${previousResponse.statusText}`);
     }
 
-    const previousData = await previousResponse.json();
+    const previousData = await previousResponse.json() as MarketstackResponse;
 
     // Map the data to our format
-    return currentData.data.map((current: any) => {
-      const previous = previousData.data.find((p: any) => p.symbol === current.symbol);
+    return currentData.data.map((current) => {
+      const previous = previousData.data.find((p) => p.symbol === current.symbol);
+      if (!previous) {
+        throw new Error(`No previous data found for symbol: ${current.symbol}`);
+      }
       const change = current.close - previous.close;
       const changePercent = (change / previous.close) * 100;
 

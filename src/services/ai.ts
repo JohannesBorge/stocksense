@@ -17,7 +17,7 @@ export async function generateStockAnalysis(
   // TODO: Implement actual AI analysis
   return {
     sentiment: 'neutral',
-    aiInsight: `Analysis for ${symbol}: The stock is currently trading at $${stockData.price.toFixed(2)} with a ${stockData.changePercent.toFixed(2)}% change.`,
+    aiInsight: `Analysis for ${companyInfo.name} (${symbol}): The ${companyInfo.industry} company is currently trading at $${stockData.price.toFixed(2)} with a ${stockData.changePercent.toFixed(2)}% change.`,
     news: [
       {
         title: 'Sample News Article',
