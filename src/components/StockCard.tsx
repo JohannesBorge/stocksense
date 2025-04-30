@@ -8,6 +8,7 @@ import { Dialog, Transition, Menu } from '@headlessui/react';
 import { Fragment } from 'react';
 import { formatDate } from '@/utils/date';
 import { formatCurrency, formatNumber } from '@/utils/format';
+import { createPortal } from 'react-dom';
 
 type StockCardProps = StockAnalysis & {
   onUpdate?: (updatedAnalysis: StockAnalysis) => void;
@@ -74,90 +75,10 @@ export default function StockCard({
     return null;
   }
 
-  return (
-    <>
-      <div className="bg-gray-800 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-700 relative">
-        <div 
-          className="cursor-pointer"
-          onClick={() => !isEditing && setIsExpanded(true)}
-        >
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-lg font-semibold text-white">{symbol}</h3>
-              <p className="text-sm text-gray-400">{companyName}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-semibold text-white">${formatCurrency(price)}</p>
-              <div className="flex items-center justify-end">
-                {isPositive ? (
-                  <ArrowUpIcon className="h-4 w-4 text-green-400" />
-                ) : (
-                  <ArrowDownIcon className="h-4 w-4 text-red-400" />
-                )}
-                <span
-                  className={`text-sm font-medium ${
-                    isPositive ? 'text-green-400' : 'text-red-400'
-                  }`}
-                >
-                  {formatCurrency(change)} ({formatNumber(changePercent)}%)
-                </span>
-              </div>
-            </div>
-          </div>
+  const renderModal = () => {
+    if (!isExpanded) return null;
 
-          <div className="mt-4">
-            <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${sentimentColors[sentiment]}`}>
-              {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)} Sentiment
-            </div>
-          </div>
-
-          <div className="mt-4 text-xs text-gray-500">
-            Last updated: {formatDate(date)}
-          </div>
-        </div>
-
-        <div className="absolute bottom-4 right-4 z-10">
-          <Menu as="div" className="relative">
-            <Menu.Button
-              onClick={(e) => e.stopPropagation()}
-              className="p-1 rounded-full hover:bg-gray-700 focus:outline-none"
-            >
-              <EllipsisHorizontalIcon className="h-5 w-5 text-gray-400" />
-            </Menu.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              <Menu.Items className="absolute right-0 bottom-full mb-2 w-48 origin-bottom-right rounded-md bg-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
-                <div className="py-1">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete();
-                        }}
-                        className={`${
-                          active ? 'bg-gray-600' : ''
-                        } flex w-full items-center px-4 py-2 text-sm text-red-400`}
-                      >
-                        <TrashIcon className="h-4 w-4 mr-2" />
-                        Delete
-                      </button>
-                    )}
-                  </Menu.Item>
-                </div>
-              </Menu.Items>
-            </Transition>
-          </Menu>
-        </div>
-      </div>
-
+    return createPortal(
       <Transition appear show={isExpanded} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setIsExpanded(false)}>
           <Transition.Child
@@ -169,7 +90,7 @@ export default function StockCard({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-gray-900/20" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -293,7 +214,95 @@ export default function StockCard({
             </div>
           </div>
         </Dialog>
-      </Transition>
+      </Transition>,
+      document.body
+    );
+  };
+
+  return (
+    <>
+      <div className="bg-gray-800 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-700 relative">
+        <div 
+          className="cursor-pointer"
+          onClick={() => !isEditing && setIsExpanded(true)}
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold text-white">{symbol}</h3>
+              <p className="text-sm text-gray-400 mt-1 line-clamp-2">{companyName}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-semibold text-white">${formatCurrency(price)}</p>
+              <div className="flex items-center justify-end">
+                {isPositive ? (
+                  <ArrowUpIcon className="h-4 w-4 text-green-400" />
+                ) : (
+                  <ArrowDownIcon className="h-4 w-4 text-red-400" />
+                )}
+                <span
+                  className={`text-sm font-medium ${
+                    isPositive ? 'text-green-400' : 'text-red-400'
+                  }`}
+                >
+                  {formatCurrency(change)} ({formatNumber(changePercent)}%)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${sentimentColors[sentiment]}`}>
+              {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)} Sentiment
+            </div>
+          </div>
+
+          <div className="mt-4 text-xs text-gray-500">
+            Last updated: {formatDate(date)}
+          </div>
+        </div>
+
+        <div className="absolute bottom-4 right-4 z-10">
+          <Menu as="div" className="relative">
+            <Menu.Button
+              onClick={(e) => e.stopPropagation()}
+              className="p-1 rounded-full hover:bg-gray-700 focus:outline-none"
+            >
+              <EllipsisHorizontalIcon className="h-5 w-5 text-gray-400" />
+            </Menu.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute right-0 bottom-full mb-2 w-48 origin-bottom-right rounded-md bg-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+                <div className="py-1">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete();
+                        }}
+                        className={`${
+                          active ? 'bg-gray-600' : ''
+                        } flex w-full items-center px-4 py-2 text-sm text-red-400`}
+                      >
+                        <TrashIcon className="h-4 w-4 mr-2" />
+                        Delete
+                      </button>
+                    )}
+                  </Menu.Item>
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+        </div>
+      </div>
+      {renderModal()}
     </>
   );
 } 

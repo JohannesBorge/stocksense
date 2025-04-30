@@ -7,6 +7,7 @@ import { fetchStockData } from '@/services/marketstack';
 import { getCompanyInfo } from '@/services/company';
 import { generateStockAnalysis } from '@/services/openai';
 import { saveAnalysis } from '@/services/firebase';
+import { createPortal } from 'react-dom';
 
 interface AnalysisModalProps {
   isOpen: boolean;
@@ -105,8 +106,8 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50">
+  return createPortal(
+    <div className="fixed inset-0 bg-gray-900/20 flex items-center justify-center p-4 z-50">
       <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-semibold text-white mb-4">New Stock Analysis</h2>
         
@@ -149,6 +150,7 @@ export default function AnalysisModal({ isOpen, onClose, onSave }: AnalysisModal
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 } 
