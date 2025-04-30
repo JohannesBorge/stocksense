@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { cache } from '@/services/cache';
 
 const MARKETSTACK_API_KEY = process.env.NEXT_PUBLIC_MARKETSTACK_API_KEY;
-const BASE_URL = 'https://api.marketstack.com/v1';
+const BASE_URL = 'https://api.marketstack.com/v2';
 
 interface HistoricalDataPoint {
   date: string;
