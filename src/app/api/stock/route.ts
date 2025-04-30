@@ -9,6 +9,23 @@ interface HistoricalDataPoint {
   price: number;
 }
 
+interface PolygonAggregateResult {
+  t: number;  // timestamp
+  o: number;  // open
+  h: number;  // high
+  l: number;  // low
+  c: number;  // close
+  v: number;  // volume
+  n: number;  // number of trades
+}
+
+interface PolygonAggregateResponse {
+  results: PolygonAggregateResult[];
+  status: string;
+  request_id: string;
+  count: number;
+}
+
 type TimeRange = '1d' | '1w' | '1m' | '3m' | '6m' | 'ytd' | '1y' | '3y' | '5y' | '10y' | 'max';
 
 function getMultiplier(range: TimeRange): number {
@@ -178,7 +195,7 @@ export async function GET(request: Request) {
         throw new Error('Failed to fetch historical data');
       }
 
-      const data = await response.json();
+      const data = await response.json() as PolygonAggregateResponse;
 
       if (!data.results || data.results.length === 0) {
         return NextResponse.json(
@@ -187,7 +204,7 @@ export async function GET(request: Request) {
         );
       }
 
-      const historicalData = data.results.map((result: any) => ({
+      const historicalData = data.results.map((result: PolygonAggregateResult) => ({
         date: new Date(result.t).toISOString().split('T')[0],
         price: result.c, // Closing price
       }));
