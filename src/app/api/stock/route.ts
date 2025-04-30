@@ -14,6 +14,16 @@ interface MarketstackHistoricalResponse {
     date: string;
     close: number;
   }>;
+  pagination?: {
+    limit: number;
+    offset: number;
+    count: number;
+    total: number;
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
 }
 
 interface MarketstackCurrentResponse {
@@ -25,6 +35,10 @@ interface MarketstackCurrentResponse {
     open: number;
     volume: number;
   }>;
+  error?: {
+    code: string;
+    message: string;
+  };
 }
 
 type TimeRange = '1d' | '1w' | '1m' | '3m' | '6m' | 'ytd' | '1y' | '3y' | '5y' | '10y' | 'max';
@@ -75,6 +89,14 @@ function getCacheTTL(range: TimeRange): number {
 
 export async function GET(request: Request) {
   try {
+    if (!MARKETSTACK_API_KEY) {
+      console.error('Marketstack API key is not configured');
+      return NextResponse.json(
+        { error: 'API configuration error' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol');
     const type = searchParams.get('type');
@@ -137,6 +159,13 @@ export async function GET(request: Request) {
           break;
       }
 
+      console.log('Fetching historical data:', {
+        symbol,
+        from: from.toISOString().split('T')[0],
+        to: to.toISOString().split('T')[0],
+        interval
+      });
+
       const response = await fetch(
         `${BASE_URL}/eod?access_key=${MARKETSTACK_API_KEY}&symbols=${symbol}&date_from=${from.toISOString().split('T')[0]}&date_to=${to.toISOString().split('T')[0]}&interval=${interval}`
       );
@@ -148,14 +177,25 @@ export async function GET(request: Request) {
           statusText: response.statusText,
           error: errorText
         });
-        throw new Error('Failed to fetch historical data');
+        return NextResponse.json(
+          { error: `Failed to fetch historical data: ${response.statusText}` },
+          { status: response.status }
+        );
       }
 
       const data = await response.json() as MarketstackHistoricalResponse;
 
+      if (data.error) {
+        console.error('Marketstack API returned error:', data.error);
+        return NextResponse.json(
+          { error: `Marketstack API error: ${data.error.message}` },
+          { status: 400 }
+        );
+      }
+
       if (!data.data || data.data.length === 0) {
         return NextResponse.json(
-          { error: 'No historical data available' },
+          { error: 'No historical data available for this time range' },
           { status: 404 }
         );
       }
