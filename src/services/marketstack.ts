@@ -68,12 +68,16 @@ export async function fetchStockData(symbol: string): Promise<MarketstackStockDa
     }
 
     const historicalData = await historicalResponse.json() as MarketstackResponse;
-    const historicalPrice = historicalData.data[0]?.close || currentPrice;
-    console.log('Historical price:', historicalPrice);
+    
+    // Find the oldest price from the last 24 hours
+    const historicalPrices = historicalData.data || [];
+    const oldestPrice = historicalPrices.length > 0 ? historicalPrices[historicalPrices.length - 1].close : currentPrice;
+    
+    console.log('Historical price:', oldestPrice);
 
     // Calculate change and change percent
-    const change = currentPrice - historicalPrice;
-    const changePercent = (change / historicalPrice) * 100;
+    const change = currentPrice - oldestPrice;
+    const changePercent = (change / oldestPrice) * 100;
 
     return {
       symbol,
@@ -126,11 +130,10 @@ export async function fetchBatchStockData(symbols: string[]): Promise<Marketstac
     // Map the data to our format
     return currentData.data.map((current) => {
       const historical = historicalData.data.find((p) => p.symbol === current.symbol);
-      if (!historical) {
-        throw new Error(`No historical data found for symbol: ${current.symbol}`);
-      }
-      const change = current.close - historical.close;
-      const changePercent = (change / historical.close) * 100;
+      const oldestPrice = historical ? historical.close : current.close;
+      
+      const change = current.close - oldestPrice;
+      const changePercent = (change / oldestPrice) * 100;
 
       return {
         symbol: current.symbol,
