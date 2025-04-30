@@ -48,42 +48,42 @@ export async function fetchStockData(symbol: string): Promise<MarketstackStockDa
     const currentPrice = currentData.data[0].close;
     console.log('Current price:', currentPrice);
 
-    // Get previous day's price for change calculation
-    console.log('Fetching previous day price for symbol:', symbol);
-    const previousResponse = await fetch(
-      `${BASE_URL}/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=${symbol}`
+    // Get price from 24 hours ago
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+    
+    console.log('Fetching price from 24 hours ago for symbol:', symbol);
+    const historicalResponse = await fetch(
+      `${BASE_URL}/intraday?access_key=${MARKETSTACK_API_KEY}&symbols=${symbol}&date_from=${twentyFourHoursAgo.toISOString().split('T')[0]}`
     );
 
-    if (!previousResponse.ok) {
-      const errorText = await previousResponse.text();
+    if (!historicalResponse.ok) {
+      const errorText = await historicalResponse.text();
       console.error('Marketstack API error:', {
-        status: previousResponse.status,
-        statusText: previousResponse.statusText,
+        status: historicalResponse.status,
+        statusText: historicalResponse.statusText,
         error: errorText
       });
-      throw new Error(`Failed to fetch previous day data: ${previousResponse.statusText}`);
+      throw new Error(`Failed to fetch historical data: ${historicalResponse.statusText}`);
     }
 
-    const previousData = await previousResponse.json() as MarketstackResponse;
-    const previousPrice = previousData.data[0].close;
-    console.log('Previous price:', previousPrice);
+    const historicalData = await historicalResponse.json() as MarketstackResponse;
+    const historicalPrice = historicalData.data[0]?.close || currentPrice;
+    console.log('Historical price:', historicalPrice);
 
     // Calculate change and change percent
-    const change = currentPrice - previousPrice;
-    const changePercent = (change / previousPrice) * 100;
+    const change = currentPrice - historicalPrice;
+    const changePercent = (change / historicalPrice) * 100;
 
     return {
       symbol,
       price: currentPrice,
       change,
       changePercent,
-      lastUpdated: currentData.data[0].date
+      lastUpdated: new Date().toISOString(),
     };
   } catch (error) {
     console.error('Error fetching stock data:', error);
-    if (error instanceof Error) {
-      throw new Error(`Failed to fetch stock data: ${error.message}`);
-    }
     throw error;
   }
 }
