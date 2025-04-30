@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, getDocs, Timestamp, limit, startAfter } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
 
 export async function GET(request: Request) {
   try {
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
     // Create the base query
-    let q = query(
+    const q = query(
       collection(db, 'stocks'),
       where('listingDate', '>=', Timestamp.fromDate(cutoffDate)),
       orderBy('listingDate', 'desc')

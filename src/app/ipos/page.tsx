@@ -4,10 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import Layout from '@/components/Layout';
-import { fetchStockData } from '@/services/marketstack';
-import { getCompanyInfo } from '@/services/company';
 
 interface Stock {
   symbol: string;
