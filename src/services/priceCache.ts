@@ -87,10 +87,10 @@ class PriceCache {
     // Update prices immediately
     this.updatePrices(symbols);
 
-    // Then update every 15 minutes
+    // Then update every 30 minutes
     this.updateInterval = setInterval(() => {
       this.updatePrices(symbols);
-    }, 15 * 60 * 1000);
+    }, 30 * 60 * 1000);
   }
 
   stopUpdates() {

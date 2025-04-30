@@ -84,8 +84,8 @@ export default function Dashboard() {
       }
     };
 
-    // Update prices every 15 seconds from cache
-    const interval = setInterval(updatePrices, 15000);
+    // Update prices every 30 minutes from cache
+    const interval = setInterval(updatePrices, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, [stocks]);
 

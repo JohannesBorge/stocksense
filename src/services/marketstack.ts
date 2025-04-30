@@ -109,25 +109,28 @@ export async function fetchBatchStockData(symbols: string[]): Promise<Marketstac
       throw new Error('No data available for the requested symbols');
     }
 
-    // Get previous day's prices
-    const previousResponse = await fetch(
-      `${BASE_URL}/eod/latest?access_key=${MARKETSTACK_API_KEY}&symbols=${symbols.join(',')}`
+    // Get prices from 24 hours ago
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+    
+    const historicalResponse = await fetch(
+      `${BASE_URL}/intraday?access_key=${MARKETSTACK_API_KEY}&symbols=${symbols.join(',')}&date_from=${twentyFourHoursAgo.toISOString().split('T')[0]}`
     );
 
-    if (!previousResponse.ok) {
-      throw new Error(`Failed to fetch previous day batch data: ${previousResponse.statusText}`);
+    if (!historicalResponse.ok) {
+      throw new Error(`Failed to fetch historical batch data: ${historicalResponse.statusText}`);
     }
 
-    const previousData = await previousResponse.json() as MarketstackResponse;
+    const historicalData = await historicalResponse.json() as MarketstackResponse;
 
     // Map the data to our format
     return currentData.data.map((current) => {
-      const previous = previousData.data.find((p) => p.symbol === current.symbol);
-      if (!previous) {
-        throw new Error(`No previous data found for symbol: ${current.symbol}`);
+      const historical = historicalData.data.find((p) => p.symbol === current.symbol);
+      if (!historical) {
+        throw new Error(`No historical data found for symbol: ${current.symbol}`);
       }
-      const change = current.close - previous.close;
-      const changePercent = (change / previous.close) * 100;
+      const change = current.close - historical.close;
+      const changePercent = (change / historical.close) * 100;
 
       return {
         symbol: current.symbol,
