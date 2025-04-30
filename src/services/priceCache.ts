@@ -93,6 +93,18 @@ class PriceCache {
       clearInterval(this.updateInterval);
     }
 
+    // Add symbols to cache if they don't exist
+    for (const symbol of symbols) {
+      if (!this.cache.has(symbol)) {
+        this.cache.set(symbol, {
+          price: 0,
+          change: 0,
+          changePercent: 0,
+          lastUpdated: new Date()
+        });
+      }
+    }
+
     // Update prices immediately
     this.updatePrices();
 
