@@ -32,8 +32,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Disclosure as="nav" className="bg-gray-800 shadow-sm">
+    <div className="min-h-screen bg-gray-950">
+      <Disclosure as="nav" className="bg-gray-900 shadow-sm">
         {({ open }) => (
           <>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -65,7 +65,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {user ? (
                     <Menu as="div" className="relative ml-3">
                       <div>
-                        <Menu.Button className="flex rounded-full bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+                        <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900">
                           <span className="sr-only">Open user menu</span>
                           <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
                             <span className="text-white font-medium">
@@ -83,13 +83,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <Menu.Item>
                             {({ active }) => (
                               <button
                                 onClick={handleLogout}
                                 className={classNames(
-                                  active ? 'bg-gray-600' : '',
+                                  active ? 'bg-gray-700' : '',
                                   'block w-full px-4 py-2 text-left text-sm text-gray-300'
                                 )}
                               >
@@ -104,7 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className="space-x-4">
                       <Link
                         href="/login"
-                        className="rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-600"
+                        className="rounded-md bg-gray-800 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700"
                       >
                         Sign in
                       </Link>
@@ -118,7 +118,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   )}
                 </div>
                 <div className="-mr-2 flex items-center sm:hidden">
-                  <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                  <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
                     <span className="sr-only">Open main menu</span>
                     {open ? (
                       <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
@@ -139,8 +139,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={classNames(
                       pathname === item.href
-                        ? 'bg-gray-700 border-indigo-400 text-white'
-                        : 'border-transparent text-gray-300 hover:bg-gray-700 hover:border-gray-300 hover:text-white',
+                        ? 'bg-gray-800 border-indigo-400 text-white'
+                        : 'border-transparent text-gray-300 hover:bg-gray-800 hover:border-gray-300 hover:text-white',
                       'block border-l-4 py-2 pl-3 pr-4 text-base font-medium'
                     )}
                   >
@@ -148,13 +148,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </Disclosure.Button>
                 ))}
               </div>
-              <div className="border-t border-gray-700 pb-3 pt-4">
+              <div className="border-t border-gray-800 pb-3 pt-4">
                 {user ? (
                   <div className="space-y-1">
                     <Disclosure.Button
                       as="button"
                       onClick={handleLogout}
-                      className="block w-full px-4 py-2 text-left text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                      className="block w-full px-4 py-2 text-left text-base font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
                     >
                       Sign out
                     </Disclosure.Button>
@@ -164,14 +164,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <Disclosure.Button
                       as="a"
                       href="/login"
-                      className="block px-4 py-2 text-base font-medium text-white hover:bg-gray-700 hover:text-gray-300"
+                      className="block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300"
                     >
                       Sign in
                     </Disclosure.Button>
                     <Disclosure.Button
                       as="a"
                       href="/signup"
-                      className="block px-4 py-2 text-base font-medium text-white hover:bg-gray-700 hover:text-gray-300"
+                      className="block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300"
                     >
                       Sign up
                     </Disclosure.Button>

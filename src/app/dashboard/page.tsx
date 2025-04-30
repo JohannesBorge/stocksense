@@ -188,7 +188,7 @@ export default function Dashboard() {
               placeholder="Search stocks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-md border-0 bg-gray-800 px-4 py-2 text-white shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+              className="w-full rounded-md border-0 bg-gray-900 px-4 py-2 text-white shadow-sm ring-1 ring-inset ring-gray-800 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
             />
           </div>
           <div className="flex gap-2">
@@ -197,7 +197,7 @@ export default function Dashboard() {
               className={`px-4 py-2 rounded-md text-sm font-semibold ${
                 selectedSentiment === null
                   ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  : 'bg-gray-900 text-gray-300 hover:bg-gray-800'
               }`}
             >
               All
@@ -207,7 +207,7 @@ export default function Dashboard() {
               className={`px-4 py-2 rounded-md text-sm font-semibold ${
                 selectedSentiment === 'positive'
                   ? 'bg-green-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  : 'bg-gray-900 text-gray-300 hover:bg-gray-800'
               }`}
             >
               Positive
@@ -217,7 +217,7 @@ export default function Dashboard() {
               className={`px-4 py-2 rounded-md text-sm font-semibold ${
                 selectedSentiment === 'neutral'
                   ? 'bg-yellow-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  : 'bg-gray-900 text-gray-300 hover:bg-gray-800'
               }`}
             >
               Neutral
@@ -227,7 +227,7 @@ export default function Dashboard() {
               className={`px-4 py-2 rounded-md text-sm font-semibold ${
                 selectedSentiment === 'negative'
                   ? 'bg-red-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  : 'bg-gray-900 text-gray-300 hover:bg-gray-800'
               }`}
             >
               Negative

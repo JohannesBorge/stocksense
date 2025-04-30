@@ -221,7 +221,7 @@ export default function StockCard({
 
   return (
     <>
-      <div className="bg-gray-800 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-700 relative">
+      <div className="bg-gray-900 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-800 relative">
         <div 
           className="cursor-pointer"
           onClick={() => !isEditing && setIsExpanded(true)}
@@ -265,7 +265,7 @@ export default function StockCard({
           <Menu as="div" className="relative">
             <Menu.Button
               onClick={(e) => e.stopPropagation()}
-              className="p-1 rounded-full hover:bg-gray-700 focus:outline-none"
+              className="p-1 rounded-full hover:bg-gray-800 focus:outline-none"
             >
               <EllipsisHorizontalIcon className="h-5 w-5 text-gray-400" />
             </Menu.Button>
@@ -278,7 +278,7 @@ export default function StockCard({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 bottom-full mb-2 w-48 origin-bottom-right rounded-md bg-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+              <Menu.Items className="absolute right-0 bottom-full mb-2 w-48 origin-bottom-right rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
                 <div className="py-1">
                   <Menu.Item>
                     {({ active }) => (
@@ -288,7 +288,7 @@ export default function StockCard({
                           handleDelete();
                         }}
                         className={`${
-                          active ? 'bg-gray-600' : ''
+                          active ? 'bg-gray-700' : ''
                         } flex w-full items-center px-4 py-2 text-sm text-red-400`}
                       >
                         <TrashIcon className="h-4 w-4 mr-2" />
