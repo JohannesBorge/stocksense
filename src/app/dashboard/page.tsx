@@ -9,7 +9,7 @@ import AnalysisModal from '@/components/AnalysisModal';
 import ChatBox from '@/components/ChatBox';
 import { StockAnalysis } from '@/types/stock';
 import { getUserAnalyses, updateAnalysis, deleteAnalysis } from '@/services/firebase';
-import { fetchStockData } from '@/services/alphaVantage';
+import { fetchStockData } from '@/services/polygon';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
