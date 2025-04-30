@@ -166,8 +166,15 @@ export async function GET(request: Request) {
         interval
       });
 
+      // Format dates in YYYY-MM-DD format
+      const fromDate = from.toISOString().split('T')[0];
+      const toDate = to.toISOString().split('T')[0];
+
+      // Marketstack requires symbols to be uppercase
+      const formattedSymbol = symbol.toUpperCase();
+
       const response = await fetch(
-        `${BASE_URL}/eod?access_key=${MARKETSTACK_API_KEY}&symbols=${symbol}&date_from=${from.toISOString().split('T')[0]}&date_to=${to.toISOString().split('T')[0]}&interval=${interval}`
+        `${BASE_URL}/eod?access_key=${MARKETSTACK_API_KEY}&symbols=${formattedSymbol}&date_from=${fromDate}&date_to=${toDate}&interval=${interval}&limit=1000`
       );
 
       if (!response.ok) {
@@ -175,7 +182,8 @@ export async function GET(request: Request) {
         console.error('Marketstack API error:', {
           status: response.status,
           statusText: response.statusText,
-          error: errorText
+          error: errorText,
+          url: response.url
         });
         return NextResponse.json(
           { error: `Failed to fetch historical data: ${response.statusText}` },
