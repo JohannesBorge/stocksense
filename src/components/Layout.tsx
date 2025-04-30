@@ -40,7 +40,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="flex h-16 justify-between">
                 <div className="flex">
                   <div className="flex flex-shrink-0 items-center">
-                    <Link href="/" className="text-2xl font-bold text-indigo-400">
+                    <Link href="/" className="text-2xl font-bold text-purple-400">
                       StockSense
                     </Link>
                   </div>
@@ -51,7 +51,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         href={item.href}
                         className={classNames(
                           pathname === item.href
-                            ? 'border-indigo-400 text-white'
+                            ? 'border-purple-400 text-white'
                             : 'border-transparent text-gray-300 hover:border-gray-300 hover:text-white',
                           'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
                         )}
@@ -65,9 +65,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {user ? (
                     <Menu as="div" className="relative ml-3">
                       <div>
-                        <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900">
+                        <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900">
                           <span className="sr-only">Open user menu</span>
-                          <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
+                          <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
                             <span className="text-white font-medium">
                               {user.email?.[0].toUpperCase()}
                             </span>
@@ -110,7 +110,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       </Link>
                       <Link
                         href="/signup"
-                        className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                        className="rounded-md bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500"
                       >
                         Sign up
                       </Link>
@@ -118,7 +118,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   )}
                 </div>
                 <div className="-mr-2 flex items-center sm:hidden">
-                  <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                  <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500">
                     <span className="sr-only">Open main menu</span>
                     {open ? (
                       <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
@@ -139,7 +139,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={classNames(
                       pathname === item.href
-                        ? 'bg-gray-800 border-indigo-400 text-white'
+                        ? 'bg-gray-800 border-purple-400 text-white'
                         : 'border-transparent text-gray-300 hover:bg-gray-800 hover:border-gray-300 hover:text-white',
                       'block border-l-4 py-2 pl-3 pr-4 text-base font-medium'
                     )}

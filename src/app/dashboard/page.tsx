@@ -161,7 +161,7 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+              className="rounded-md bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500"
             >
               New Analysis
             </button>
@@ -188,7 +188,7 @@ export default function Dashboard() {
               placeholder="Search stocks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-md border-0 bg-gray-900 px-4 py-2 text-white shadow-sm ring-1 ring-inset ring-gray-800 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+              className="w-full rounded-md border-0 bg-gray-900 px-4 py-2 text-white shadow-sm ring-1 ring-inset ring-gray-800 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600"
             />
           </div>
           <div className="flex gap-2">
@@ -196,7 +196,7 @@ export default function Dashboard() {
               onClick={() => setSelectedSentiment(null)}
               className={`px-4 py-2 rounded-md text-sm font-semibold ${
                 selectedSentiment === null
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-purple-600 text-white'
                   : 'bg-gray-900 text-gray-300 hover:bg-gray-800'
               }`}
             >

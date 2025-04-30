@@ -50,7 +50,7 @@ export default function Home() {
         {/* Feature section */}
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:text-center">
-            <h2 className="text-base font-semibold leading-7 text-indigo-400">Smarter Investing</h2>
+            <h2 className="text-base font-semibold leading-7 text-purple-400">Smarter Investing</h2>
             <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Everything you need to make informed decisions
             </p>
@@ -96,7 +96,7 @@ export default function Home() {
                 </p>
                 <Link
                   href="/signup"
-                  className="mt-8 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  className="mt-8 block rounded-md bg-purple-600 px-3 py-2 text-center text-sm font-semibold leading-6 text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
                 >
                   Get started
                 </Link>
